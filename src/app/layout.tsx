@@ -28,6 +28,14 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full
         antialiased`}
     >
+      <header>
+        <link
+          rel="stylesheet"
+          as="style"
+          crossOrigin="anonymous"
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+        />
+      </header>
       <body className="flex min-h-full flex-col">{children}</body>
     </html>
   );
