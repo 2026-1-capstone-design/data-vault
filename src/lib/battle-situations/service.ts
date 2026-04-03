@@ -4,30 +4,62 @@ import type { AuthContext } from "~/lib/authz/guards";
 
 type JsonObject = Record<string, unknown>;
 
+type TeamCount = {
+  allyCount: number;
+  enemyCount: number;
+  totalCount: number;
+};
+
 export type BattleSituationRecord = {
   id: string;
   title: string | null;
+  description: string;
   sceneJson: JsonObject;
   semanticJson: JsonObject;
+  allyCount: number;
+  enemyCount: number;
+  totalCount: number;
   createdById: string;
   updatedById: string;
   createdAt: Date;
   updatedAt: Date;
 };
 
+export type BattleSituationListSort =
+  | "updatedAt"
+  | "description"
+  | "allyCount"
+  | "enemyCount"
+  | "totalCount";
+
+export type BattleSituationListQuery = {
+  page: number;
+  pageSize: number;
+  sortBy: BattleSituationListSort;
+  sortOrder: "asc" | "desc";
+};
+
 type CreateBattleSituationInput = {
-  title?: string | null;
+  title: string | null;
+  description: string;
   sceneJson: JsonObject;
   semanticJson: JsonObject;
+  allyCount: number;
+  enemyCount: number;
+  totalCount: number;
   createdById: string;
   updatedById: string;
 };
 
 type UpdateBattleSituationInput = {
   id: string;
-  title?: string | null;
+  title: string | null;
+  description: string;
   sceneJson: JsonObject;
   semanticJson: JsonObject;
+  allyCount: number;
+  enemyCount: number;
+  totalCount: number;
   updatedById: string;
 };
 
@@ -36,7 +68,9 @@ type DeleteBattleSituationInput = {
 };
 
 export type BattleSituationRepository = {
-  listActive: () => Promise<BattleSituationRecord[]>;
+  listPage: (
+    query: BattleSituationListQuery,
+  ) => Promise<{ rows: BattleSituationRecord[]; total: number }>;
   findById: (id: string) => Promise<BattleSituationRecord | null>;
   create: (input: CreateBattleSituationInput) => Promise<BattleSituationRecord>;
   update: (input: UpdateBattleSituationInput) => Promise<BattleSituationRecord>;
@@ -66,6 +100,7 @@ export class BattleSituationError extends Error {
 
 type CreateBattleSituationPayload = {
   title?: string | null;
+  description?: string;
   sceneJson: JsonObject;
   semanticJson: JsonObject;
 };
@@ -80,6 +115,7 @@ const JsonObjectSchema = z.custom<JsonObject>(
 
 const CreateBattleSituationPayloadSchema = z.object({
   title: z.string().nullable().optional(),
+  description: z.string().optional(),
   sceneJson: JsonObjectSchema,
   semanticJson: JsonObjectSchema,
 });
@@ -89,7 +125,9 @@ type CreateBattleSituationServiceDeps = {
 };
 
 export type BattleSituationService = {
-  list: () => Promise<BattleSituationRecord[]>;
+  list: (
+    query: BattleSituationListQuery,
+  ) => Promise<{ rows: BattleSituationRecord[]; total: number }>;
   getById: (id: string) => Promise<BattleSituationRecord>;
   create: (
     auth: AuthContext,
@@ -120,8 +158,8 @@ export function createBattleSituationService(
   deps: CreateBattleSituationServiceDeps,
 ): BattleSituationService {
   return {
-    async list() {
-      return deps.repository.listActive();
+    async list(query) {
+      return deps.repository.listPage(query);
     },
     async getById(id) {
       const current = await deps.repository.findById(id);
@@ -137,17 +175,21 @@ export function createBattleSituationService(
     },
     async create(auth, payload) {
       validatePayload(payload);
+      const counts = deriveTeamCounts(payload.sceneJson);
 
       return deps.repository.create({
         title: payload.title ?? null,
+        description: payload.description?.trim() ?? "",
         sceneJson: payload.sceneJson,
         semanticJson: payload.semanticJson,
+        ...counts,
         createdById: auth.user.id,
         updatedById: auth.user.id,
       });
     },
     async update(auth, id, payload) {
       validatePayload(payload);
+      const counts = deriveTeamCounts(payload.sceneJson);
 
       const current = await deps.repository.findById(id);
 
@@ -168,8 +210,10 @@ export function createBattleSituationService(
       return deps.repository.update({
         id,
         title: payload.title ?? null,
+        description: payload.description?.trim() ?? "",
         sceneJson: payload.sceneJson,
         semanticJson: payload.semanticJson,
+        ...counts,
         updatedById: auth.user.id,
       });
     },
@@ -216,11 +260,14 @@ export function createBattleSituationService(
     },
     async importPayload(auth, payload) {
       validatePayload(payload);
+      const counts = deriveTeamCounts(payload.sceneJson);
 
       return deps.repository.create({
         title: payload.title ?? null,
+        description: payload.description?.trim() ?? "",
         sceneJson: payload.sceneJson,
         semanticJson: payload.semanticJson,
+        ...counts,
         createdById: auth.user.id,
         updatedById: auth.user.id,
       });
@@ -258,4 +305,35 @@ function canMutate(auth: AuthContext, ownerId: string): boolean {
   }
 
   return false;
+}
+
+function deriveTeamCounts(sceneJson: JsonObject): TeamCount {
+  const units = sceneJson.units;
+  if (!Array.isArray(units)) {
+    return {
+      allyCount: 0,
+      enemyCount: 0,
+      totalCount: 0,
+    };
+  }
+
+  const teamIds = units
+    .map((unit) => {
+      if (typeof unit !== "object" || unit === null) {
+        return null;
+      }
+
+      const teamId = (unit as { teamId?: unknown }).teamId;
+      return typeof teamId === "string" ? teamId : null;
+    })
+    .filter((teamId): teamId is string => teamId !== null);
+
+  const allyCount = teamIds.filter((teamId) => teamId === "ally").length;
+  const enemyCount = teamIds.filter((teamId) => teamId === "enemy").length;
+
+  return {
+    allyCount,
+    enemyCount,
+    totalCount: allyCount + enemyCount,
+  };
 }

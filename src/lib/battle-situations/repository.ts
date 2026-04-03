@@ -2,24 +2,45 @@ import type { Prisma, PrismaClient } from "~/generated/prisma/client";
 import { prisma } from "~/lib/prisma";
 
 import type {
+  BattleSituationListSort,
   BattleSituationRecord,
   BattleSituationRepository,
+  BattleSituationListQuery,
 } from "./service";
 
 type BattleSituationQueryClient = Pick<PrismaClient, "battleSituation">;
+
+const SORT_FIELD_MAP: Record<
+  BattleSituationListSort,
+  Prisma.BattleSituationScalarFieldEnum
+> = {
+  updatedAt: "updatedAt",
+  description: "description",
+  allyCount: "allyCount",
+  enemyCount: "enemyCount",
+  totalCount: "totalCount",
+};
 
 export function createBattleSituationRepository(
   db: BattleSituationQueryClient = prisma,
 ): BattleSituationRepository {
   return {
-    async listActive() {
-      const rows = await db.battleSituation.findMany({
-        orderBy: {
-          updatedAt: "desc",
-        },
-      });
+    async listPage(query: BattleSituationListQuery) {
+      const [rows, total] = await Promise.all([
+        db.battleSituation.findMany({
+          orderBy: {
+            [SORT_FIELD_MAP[query.sortBy]]: query.sortOrder,
+          },
+          skip: (query.page - 1) * query.pageSize,
+          take: query.pageSize,
+        }),
+        db.battleSituation.count(),
+      ]);
 
-      return rows.map(toRecord);
+      return {
+        rows: rows.map(toRecord),
+        total,
+      };
     },
     async findById(id) {
       const row = await db.battleSituation.findUnique({
@@ -30,9 +51,13 @@ export function createBattleSituationRepository(
     async create(input) {
       const row = await db.battleSituation.create({
         data: {
-          title: input.title ?? null,
+          title: input.title,
+          description: input.description,
           sceneJson: input.sceneJson as Prisma.InputJsonValue,
           semanticJson: input.semanticJson as Prisma.InputJsonValue,
+          allyCount: input.allyCount,
+          enemyCount: input.enemyCount,
+          totalCount: input.totalCount,
           createdById: input.createdById,
           updatedById: input.updatedById,
         },
@@ -43,9 +68,13 @@ export function createBattleSituationRepository(
       const row = await db.battleSituation.update({
         where: { id: input.id },
         data: {
-          title: input.title ?? null,
+          title: input.title,
+          description: input.description,
           sceneJson: input.sceneJson as Prisma.InputJsonValue,
           semanticJson: input.semanticJson as Prisma.InputJsonValue,
+          allyCount: input.allyCount,
+          enemyCount: input.enemyCount,
+          totalCount: input.totalCount,
           updatedById: input.updatedById,
         },
       });
@@ -66,8 +95,12 @@ function toRecord(
   return {
     id: row.id,
     title: row.title,
+    description: row.description,
     sceneJson: row.sceneJson as Record<string, unknown>,
     semanticJson: row.semanticJson as Record<string, unknown>,
+    allyCount: row.allyCount,
+    enemyCount: row.enemyCount,
+    totalCount: row.totalCount,
     createdById: row.createdById,
     updatedById: row.updatedById,
     createdAt: row.createdAt,

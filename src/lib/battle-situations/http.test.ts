@@ -34,14 +34,36 @@ function createBattleSituationServiceStub(
 ): BattleSituationService {
   return {
     async list() {
-      return [];
+      return {
+        rows: [
+          {
+            id: "bs-1",
+            title: "arena",
+            description: "arena description",
+            sceneJson: { units: [] },
+            semanticJson: { allies: [], enemies: [] },
+            allyCount: 1,
+            enemyCount: 2,
+            totalCount: 3,
+            createdById: "user-1",
+            updatedById: "user-1",
+            createdAt: new Date("2026-04-03T00:00:00.000Z"),
+            updatedAt: new Date("2026-04-03T00:00:00.000Z"),
+          },
+        ],
+        total: 1,
+      };
     },
     async getById(id) {
       return {
         id,
         title: "arena",
+        description: "arena description",
         sceneJson: { units: [] },
         semanticJson: { allies: [], enemies: [] },
+        allyCount: 1,
+        enemyCount: 1,
+        totalCount: 2,
         createdById: "user-1",
         updatedById: "user-1",
         createdAt: new Date("2026-04-03T00:00:00.000Z"),
@@ -52,8 +74,12 @@ function createBattleSituationServiceStub(
       return {
         id: "bs-1",
         title: "arena",
+        description: "arena description",
         sceneJson: { units: [] },
         semanticJson: { allies: [], enemies: [] },
+        allyCount: 1,
+        enemyCount: 1,
+        totalCount: 2,
         createdById: "user-1",
         updatedById: "user-1",
         createdAt: new Date("2026-04-03T00:00:00.000Z"),
@@ -64,8 +90,12 @@ function createBattleSituationServiceStub(
       return {
         id: "bs-1",
         title: "arena-updated",
+        description: "updated",
         sceneJson: { units: [] },
         semanticJson: { allies: [], enemies: [] },
+        allyCount: 2,
+        enemyCount: 1,
+        totalCount: 3,
         createdById: "user-1",
         updatedById: "user-1",
         createdAt: new Date("2026-04-03T00:00:00.000Z"),
@@ -76,8 +106,12 @@ function createBattleSituationServiceStub(
       return {
         id: "bs-1",
         title: "arena",
+        description: "arena description",
         sceneJson: { units: [] },
         semanticJson: { allies: [], enemies: [] },
+        allyCount: 1,
+        enemyCount: 1,
+        totalCount: 2,
         createdById: "user-1",
         updatedById: "user-1",
         createdAt: new Date("2026-04-03T00:00:00.000Z"),
@@ -99,8 +133,12 @@ function createBattleSituationServiceStub(
       return {
         id: "bs-2",
         title: "imported",
+        description: "imported desc",
         sceneJson: { units: [] },
         semanticJson: { allies: [], enemies: [] },
+        allyCount: 0,
+        enemyCount: 0,
+        totalCount: 0,
         createdById: "user-1",
         updatedById: "user-1",
         createdAt: new Date("2026-04-03T00:00:00.000Z"),
@@ -112,6 +150,31 @@ function createBattleSituationServiceStub(
 }
 
 describe("createBattleSituationHttpHandlers", () => {
+  it("returns paged list with meta from query params", async () => {
+    const handlers = createBattleSituationHttpHandlers({
+      accessService: createAccessServiceStub(),
+      battleSituationService: createBattleSituationServiceStub(),
+    });
+
+    const response = await handlers.list(
+      new Request(
+        "http://localhost/api/battle-situations?page=2&pageSize=10&sort=allyCount&order=asc",
+      ),
+    );
+
+    expect(response.status).toBe(200);
+    const payload = await response.json();
+    expect(payload.ok).toBe(true);
+    expect(payload.meta).toMatchObject({
+      page: 2,
+      pageSize: 10,
+      total: 1,
+      totalPages: 1,
+      sortBy: "allyCount",
+      sortOrder: "asc",
+    });
+  });
+
   it("returns 201 for create when authorized", async () => {
     const handlers = createBattleSituationHttpHandlers({
       accessService: createAccessServiceStub(),
@@ -122,6 +185,7 @@ describe("createBattleSituationHttpHandlers", () => {
       method: "POST",
       body: JSON.stringify({
         title: "arena",
+        description: "desc",
         sceneJson: { units: [] },
         semanticJson: { allies: [], enemies: [] },
       }),
@@ -152,6 +216,7 @@ describe("createBattleSituationHttpHandlers", () => {
       method: "POST",
       body: JSON.stringify({
         title: "arena",
+        description: "desc",
         sceneJson: { units: [] },
         semanticJson: { allies: [], enemies: [] },
       }),
@@ -182,6 +247,7 @@ describe("createBattleSituationHttpHandlers", () => {
       method: "PATCH",
       body: JSON.stringify({
         title: "arena-updated",
+        description: "updated",
         sceneJson: { units: [] },
         semanticJson: { allies: [], enemies: [] },
       }),
@@ -214,6 +280,7 @@ describe("createBattleSituationHttpHandlers", () => {
       method: "POST",
       body: JSON.stringify({
         title: "arena",
+        description: "desc",
         sceneJson: [],
         semanticJson: { allies: [], enemies: [] },
       }),

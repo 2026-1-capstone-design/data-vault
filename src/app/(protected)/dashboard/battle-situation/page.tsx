@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import { BattleSituationDashboard } from "./_components/battle-situation-dashboard";
 
 export default function BattleSituationPage() {
-  redirect("/dashboard/battle-situation-builder");
+  return <BattleSituationDashboard />;
 }

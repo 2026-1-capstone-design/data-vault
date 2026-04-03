@@ -17,6 +17,7 @@ export type DashboardNavItem = {
     | "ideas-skills"
     | "ideas-perks"
     | "ideas-gladiator-names"
+    | "battle-situation-builder"
     | "battle-situation"
     | "persona"
     | "dataset"
@@ -65,7 +66,14 @@ export const DASHBOARD_NAV_ITEMS: readonly DashboardNavItem[] = [
   },
   {
     key: "battle-situation",
-    label: "전장 상황 편집",
+    label: "전장 상황",
+    href: "/dashboard/battle-situation",
+    iconKey: "hammer",
+    roles: ["admin", "editor"],
+  },
+  {
+    key: "battle-situation-builder",
+    label: "전장 상황 편집기",
     href: "/dashboard/battle-situation-builder",
     iconKey: "hammer",
     roles: ["admin", "editor"],

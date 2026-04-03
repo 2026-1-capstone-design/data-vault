@@ -1,25 +1,57 @@
+import { z } from "zod";
+
 import type { AccessService } from "~/lib/authz/access-service";
 import { AuthzError } from "~/lib/authz/guards";
 import { rolesForPolicy } from "~/lib/authz/policy";
 
-import { BattleSituationError, type BattleSituationService } from "./service";
+import {
+  BattleSituationError,
+  type BattleSituationListQuery,
+  type BattleSituationListSort,
+  type BattleSituationService,
+} from "./service";
 
 type CreateBattleSituationHttpHandlersDeps = {
   accessService: AccessService;
   battleSituationService: BattleSituationService;
 };
 
+const SORT_VALUES: readonly BattleSituationListSort[] = [
+  "updatedAt",
+  "description",
+  "allyCount",
+  "enemyCount",
+  "totalCount",
+];
+
+const SortSchema = z.enum(SORT_VALUES);
+const SortOrderSchema = z.enum(["asc", "desc"]);
+
 export function createBattleSituationHttpHandlers(
   deps: CreateBattleSituationHttpHandlersDeps,
 ) {
   return {
-    async list() {
+    async list(request: Request) {
       try {
         await deps.accessService.requireAccess(
           rolesForPolicy("platformAccess"),
         );
-        const rows = await deps.battleSituationService.list();
-        return Response.json({ ok: true, data: rows });
+
+        const query = parseListQuery(request);
+        const listed = await deps.battleSituationService.list(query);
+
+        return Response.json({
+          ok: true,
+          data: listed.rows,
+          meta: {
+            page: query.page,
+            pageSize: query.pageSize,
+            total: listed.total,
+            totalPages: Math.max(1, Math.ceil(listed.total / query.pageSize)),
+            sortBy: query.sortBy,
+            sortOrder: query.sortOrder,
+          },
+        });
       } catch (error) {
         return toErrorResponse(error);
       }
@@ -153,4 +185,43 @@ function toErrorResponse(error: unknown): Response {
   }
 
   throw error;
+}
+
+function parseListQuery(request: Request): BattleSituationListQuery {
+  const { searchParams } = new URL(request.url);
+
+  const page = parseNumber(searchParams.get("page"), 1);
+  const pageSize = parseNumber(searchParams.get("pageSize"), 20);
+  const sortBy = parseSort(searchParams.get("sort"));
+  const sortOrder = parseSortOrder(searchParams.get("order"));
+
+  return {
+    page,
+    pageSize,
+    sortBy,
+    sortOrder,
+  };
+}
+
+function parseNumber(value: string | null, fallback: number): number {
+  if (!value) {
+    return fallback;
+  }
+
+  const parsed = Number.parseInt(value, 10);
+  if (!Number.isFinite(parsed) || parsed < 1) {
+    return fallback;
+  }
+
+  return parsed;
+}
+
+function parseSort(value: string | null): BattleSituationListSort {
+  const parsed = SortSchema.safeParse(value);
+  return parsed.success ? parsed.data : "updatedAt";
+}
+
+function parseSortOrder(value: string | null): "asc" | "desc" {
+  const parsed = SortOrderSchema.safeParse(value);
+  return parsed.success ? parsed.data : "desc";
 }

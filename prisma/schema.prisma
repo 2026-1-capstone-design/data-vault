@@ -111,8 +111,12 @@ model GladiatorNameIdea {
 model BattleSituation {
   id           String    @id @default(cuid())
   title        String?   @db.Text
+  description  String    @default("") @db.Text
   sceneJson    Json      @map("scene_json")
   semanticJson Json      @map("semantic_json")
+  allyCount    Int       @default(0) @map("ally_count")
+  enemyCount   Int       @default(0) @map("enemy_count")
+  totalCount   Int       @default(0) @map("total_count")
   createdById  String    @db.Uuid @map("created_by_id")
   updatedById  String    @db.Uuid @map("updated_by_id")
   createdAt    DateTime  @default(now()) @map("created_at")
@@ -122,6 +126,9 @@ model BattleSituation {
   updatedBy UserProfile @relation("BattleSituationUpdatedBy", fields: [updatedById], references: [id])
 
   @@index([createdById], map: "battle_situations_created_by_id_idx")
+  @@index([allyCount], map: "battle_situations_ally_count_idx")
+  @@index([enemyCount], map: "battle_situations_enemy_count_idx")
+  @@index([totalCount], map: "battle_situations_total_count_idx")
   @@index([updatedAt], map: "battle_situations_updated_at_idx")
   @@map("battle_situations")
 }

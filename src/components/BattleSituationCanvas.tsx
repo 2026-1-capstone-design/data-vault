@@ -14,6 +14,7 @@ export const BattleSituationCanvas = ({
   scene,
   width,
   height,
+  draggable = true,
   selectedUnitId,
   onUnitPress,
   onEmptyPress,
@@ -127,7 +128,7 @@ export const BattleSituationCanvas = ({
                 key={unit.unitId}
                 x={pixel.x}
                 y={pixel.y}
-                draggable
+                draggable={draggable}
                 dragBoundFunc={(pos) => {
                   const world = pixelToWorld(pos, centerX, centerY, scale);
                   const clamped = clampUnitPositionToArena(scene.arena, {
@@ -141,6 +142,9 @@ export const BattleSituationCanvas = ({
                 onTap={() => onUnitPress?.(unit.unitId)}
                 onDragStart={() => onUnitPress?.(unit.unitId)}
                 onDragMove={(event) => {
+                  if (!draggable) {
+                    return;
+                  }
                   const world = pixelToWorld(
                     {
                       x: event.target.x(),
@@ -153,6 +157,9 @@ export const BattleSituationCanvas = ({
                   onUnitMove?.(unit.unitId, world);
                 }}
                 onDragEnd={(event) => {
+                  if (!draggable) {
+                    return;
+                  }
                   const world = pixelToWorld(
                     {
                       x: event.target.x(),

@@ -23,7 +23,7 @@ export const DashboardShell = ({ children, navItems }: DashboardShellProps) => {
 
         <section
           className="flex h-[calc(100vh-2rem)] min-w-0 flex-1 flex-col gap-4
-            overflow-y-auto pr-1"
+            overflow-y-auto p-0.5 pr-1"
         >
           {children}
         </section>
