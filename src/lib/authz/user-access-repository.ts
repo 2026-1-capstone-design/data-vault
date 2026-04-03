@@ -4,7 +4,7 @@ import type { RoleName } from "./guards";
 
 type UserRoleQueryClient = {
   userRole: {
-    findMany: (_input: {
+    findMany: (input: {
       where: { userId: string };
       select: {
         role: {
@@ -18,7 +18,7 @@ type UserRoleQueryClient = {
 };
 
 export type UserAccessRepository = {
-  findRolesByUserId: (_userId: string) => Promise<RoleName[]>;
+  findRolesByUserId: (userId: string) => Promise<RoleName[]>;
 };
 
 export function createUserAccessRepository(

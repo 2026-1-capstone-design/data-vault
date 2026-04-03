@@ -22,8 +22,8 @@ type AccessFailure = {
 export type AccessResult = AccessOk | AccessFailure;
 
 export type AccessService = {
-  getAccess: (_allowed: readonly RoleName[]) => Promise<AccessResult>;
-  requireAccess: (_allowed: readonly RoleName[]) => Promise<AuthContext>;
+  getAccess: (allowed: readonly RoleName[]) => Promise<AccessResult>;
+  requireAccess: (allowed: readonly RoleName[]) => Promise<AuthContext>;
 };
 
 type CreateAccessServiceDeps = {

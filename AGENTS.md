@@ -7,6 +7,9 @@ This version has breaking changes — APIs, conventions, and file structure may 
 # UI Component Rule
 Use HeroUI as the default component library for all basic UI components.
 
+# Responsive Scope Rule
+This web app does not need responsive design and is intended for desktop use only.
+
 # Folder Structure Rule
 - `src/app`: Next.js App Router. Place one-off components in the appropriate scoped `_components` folder under this directory. If a component here starts being reused, move it to `src/components`.
 - `src/components`: Reusable components. Keep a single depth (do not split by domain; express domain context in the component name).
