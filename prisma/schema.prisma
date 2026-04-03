@@ -23,6 +23,8 @@ model UserProfile {
   skillIdeas          SkillIdea[]          @relation("SkillIdeaCreatedBy")
   perkIdeas           PerkIdea[]           @relation("PerkIdeaCreatedBy")
   gladiatorNameIdeas  GladiatorNameIdea[]  @relation("GladiatorNameIdeaCreatedBy")
+  battleSituationsCreated BattleSituation[] @relation("BattleSituationCreatedBy")
+  battleSituationsUpdated BattleSituation[] @relation("BattleSituationUpdatedBy")
 
   @@map("user_profiles")
 }
@@ -56,13 +58,11 @@ model WeaponIdea {
   description String?     @db.Text
   createdAt   DateTime    @default(now()) @map("created_at")
   updatedAt   DateTime    @updatedAt @map("updated_at")
-  deletedAt   DateTime?   @map("deleted_at")
   createdById String      @db.Uuid @map("created_by_id")
 
   createdBy UserProfile @relation("WeaponIdeaCreatedBy", fields: [createdById], references: [id])
 
   @@index([createdById], map: "weapon_ideas_created_by_id_idx")
-  @@index([deletedAt], map: "weapon_ideas_deleted_at_idx")
   @@map("weapon_ideas")
 }
 
@@ -72,13 +72,11 @@ model SkillIdea {
   description String?     @db.Text
   createdAt   DateTime    @default(now()) @map("created_at")
   updatedAt   DateTime    @updatedAt @map("updated_at")
-  deletedAt   DateTime?   @map("deleted_at")
   createdById String      @db.Uuid @map("created_by_id")
 
   createdBy UserProfile @relation("SkillIdeaCreatedBy", fields: [createdById], references: [id])
 
   @@index([createdById], map: "skill_ideas_created_by_id_idx")
-  @@index([deletedAt], map: "skill_ideas_deleted_at_idx")
   @@map("skill_ideas")
 }
 
@@ -88,13 +86,11 @@ model PerkIdea {
   description String?     @db.Text
   createdAt   DateTime    @default(now()) @map("created_at")
   updatedAt   DateTime    @updatedAt @map("updated_at")
-  deletedAt   DateTime?   @map("deleted_at")
   createdById String      @db.Uuid @map("created_by_id")
 
   createdBy UserProfile @relation("PerkIdeaCreatedBy", fields: [createdById], references: [id])
 
   @@index([createdById], map: "perk_ideas_created_by_id_idx")
-  @@index([deletedAt], map: "perk_ideas_deleted_at_idx")
   @@map("perk_ideas")
 }
 
@@ -104,12 +100,28 @@ model GladiatorNameIdea {
   description String?     @db.Text
   createdAt   DateTime    @default(now()) @map("created_at")
   updatedAt   DateTime    @updatedAt @map("updated_at")
-  deletedAt   DateTime?   @map("deleted_at")
   createdById String      @db.Uuid @map("created_by_id")
 
   createdBy UserProfile @relation("GladiatorNameIdeaCreatedBy", fields: [createdById], references: [id])
 
   @@index([createdById], map: "gladiator_name_ideas_created_by_id_idx")
-  @@index([deletedAt], map: "gladiator_name_ideas_deleted_at_idx")
   @@map("gladiator_name_ideas")
+}
+
+model BattleSituation {
+  id           String    @id @default(cuid())
+  title        String?   @db.Text
+  sceneJson    Json      @map("scene_json")
+  semanticJson Json      @map("semantic_json")
+  createdById  String    @db.Uuid @map("created_by_id")
+  updatedById  String    @db.Uuid @map("updated_by_id")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  createdBy UserProfile @relation("BattleSituationCreatedBy", fields: [createdById], references: [id])
+  updatedBy UserProfile @relation("BattleSituationUpdatedBy", fields: [updatedById], references: [id])
+
+  @@index([createdById], map: "battle_situations_created_by_id_idx")
+  @@index([updatedAt], map: "battle_situations_updated_at_idx")
+  @@map("battle_situations")
 }

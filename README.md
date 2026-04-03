@@ -89,9 +89,21 @@ pnpm start
 pnpm lint
 pnpm test
 pnpm prisma:generate
-pnpm prisma:migrate --name init
+pnpm prisma:migrate
+pnpm prisma:migrate:deploy
 pnpm prisma:seed
 ```
+
+## Supabase 전용 마이그레이션 워크플로우
+
+이 프로젝트는 Supabase DB만 사용하는 운영을 기준으로, `migrate dev` 대신 `migrate deploy`를 사용합니다.
+
+1. `.env`에 Supabase 연결 문자열(`DATABASE_URL`, `DIRECT_URL`)을 설정합니다.
+2. `pnpm prisma:generate`를 실행합니다.
+3. `pnpm prisma:migrate`(=`prisma migrate deploy`)를 실행해 `prisma/migrations`의 SQL을 적용합니다.
+4. 필요 시 `pnpm prisma:seed`를 실행합니다.
+
+새 스키마 변경이 필요할 때는 `prisma/migrations/<timestamp>_<name>/migration.sql`을 직접 추가한 뒤 `migrate deploy`로 반영합니다.
 
 ## 문서
 
