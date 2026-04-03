@@ -3,7 +3,7 @@ import nextPlugin from "@next/eslint-plugin-next";
 import { defineConfig, globalIgnores } from "eslint/config";
 
 const eslintConfig = defineConfig([
-  ...kurateh.configs.recommended,
+  ...kurateh.configs.react,
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:
@@ -11,14 +11,23 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    ".agents/**",
   ]),
   {
-    files: ["*.config.*"],
+    files: ["**/*.{js,jsx,ts,tsx}"],
+    plugins: {
+      "@next/next": nextPlugin,
+    },
     rules: {
-      "import/no-unresolved": 0,
+      ...nextPlugin.configs.recommended.rules,
     },
   },
   {
+    settings: {
+      react: {
+        version: "detect",
+      },
+    },
     rules: {
       "@kurateh/import-path": 1,
 
@@ -65,12 +74,15 @@ const eslintConfig = defineConfig([
     },
   },
   {
-    files: ["**/*.{js,jsx,ts,tsx}"],
-    plugins: {
-      "@next/next": nextPlugin,
-    },
+    files: ["*.config.*"],
     rules: {
-      ...nextPlugin.configs.recommended.rules,
+      "import/no-unresolved": 0,
+    },
+  },
+  {
+    files: ["**/layout.tsx", "**/page.tsx"],
+    rules: {
+      "react/function-component-definition": 0,
     },
   },
 ]);
