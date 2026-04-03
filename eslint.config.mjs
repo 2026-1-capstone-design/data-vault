@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
     ".agents/**",
+    ".heroui-docs/**",
+    "src/generated/prisma/**",
   ]),
   {
     files: ["**/*.{js,jsx,ts,tsx}"],
