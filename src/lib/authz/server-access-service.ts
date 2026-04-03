@@ -1,10 +1,11 @@
 import { createSupabaseServerClient } from "~/lib/supabase/server";
 
 import { createAccessService, type AccessService } from "./access-service";
-import { loadUserRoles } from "./role-store";
+import { createPrismaUserAccessRepository } from "./prisma-user-access-repository";
 
 export async function createServerAccessService(): Promise<AccessService> {
   const supabase = await createSupabaseServerClient();
+  const userAccessRepo = createPrismaUserAccessRepository();
 
   return createAccessService({
     getCurrentUser: async () => {
@@ -19,6 +20,6 @@ export async function createServerAccessService(): Promise<AccessService> {
         email: data.user.email,
       };
     },
-    loadRoles: loadUserRoles,
+    loadRoles: (userId) => userAccessRepo.findRolesByUserId(userId),
   });
 }
