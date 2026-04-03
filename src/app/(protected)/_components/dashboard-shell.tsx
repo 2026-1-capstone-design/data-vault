@@ -1,33 +1,31 @@
-import { Card } from "@heroui/react";
-
+import { Card, CardContent } from "~/components/ui/card";
 import type { DashboardNavItem } from "~/lib/navigation/dashboard-nav";
 
 import { DashboardSidebar } from "./dashboard-sidebar";
-import { DashboardTopbar } from "./dashboard-topbar";
 
 type DashboardShellProps = {
   children: React.ReactNode;
   navItems: readonly DashboardNavItem[];
-  userEmail?: string | null;
 };
 
-export const DashboardShell = ({
-  children,
-  navItems,
-  userEmail,
-}: DashboardShellProps) => {
+export const DashboardShell = ({ children, navItems }: DashboardShellProps) => {
   return (
-    <div className="w-full p-8">
-      <div className="flex min-h-[calc(100vh-4rem)] w-full gap-6">
-        <Card className="h-auto w-72 shrink-0 bg-black p-4 text-white">
-          <Card.Content className="px-0">
+    <div className="h-screen w-full overflow-hidden p-4">
+      <div className="flex h-full w-full gap-4">
+        <Card
+          className="sticky top-4 h-[calc(100vh-2rem)] w-48 shrink-0 bg-black
+            py-4 text-white"
+        >
+          <CardContent className="h-full overflow-y-auto px-2">
             <DashboardSidebar items={navItems} />
-          </Card.Content>
+          </CardContent>
         </Card>
 
-        <section className="flex min-w-0 flex-1 flex-col gap-4">
-          <DashboardTopbar userEmail={userEmail} />
-          <Card className="min-h-[calc(100vh-9rem)] p-6">{children}</Card>
+        <section
+          className="flex h-[calc(100vh-2rem)] min-w-0 flex-1 flex-col gap-4
+            overflow-y-auto pr-1"
+        >
+          {children}
         </section>
       </div>
     </div>

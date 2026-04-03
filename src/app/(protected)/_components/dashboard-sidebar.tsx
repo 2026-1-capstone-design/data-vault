@@ -1,11 +1,12 @@
 "use client";
 
-import { Card, Link } from "@heroui/react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import type { DashboardNavItem } from "~/lib/navigation/dashboard-nav";
 import { DASHBOARD_NAV_ICON_MAP } from "~/lib/navigation/dashboard-nav-icons";
 import { isDashboardNavActive } from "~/lib/navigation/is-nav-active";
+import { cn } from "~/lib/utils";
 
 type DashboardSidebarProps = {
   items: readonly DashboardNavItem[];
@@ -15,7 +16,10 @@ export const DashboardSidebar = ({ items }: DashboardSidebarProps) => {
   const pathname = usePathname();
 
   return (
-    <nav aria-label="Dashboard navigation" className="w-full space-y-1">
+    <nav
+      aria-label="Dashboard navigation"
+      className="flex w-full flex-col gap-1"
+    >
       {items.map((item) => {
         const Icon = DASHBOARD_NAV_ICON_MAP[item.iconKey];
         const isActive = isDashboardNavActive({
@@ -24,24 +28,18 @@ export const DashboardSidebar = ({ items }: DashboardSidebarProps) => {
         });
 
         return (
-          <Card
+          <Link
             key={item.key}
-            className={
-              isActive
-                ? "bg-white/20 p-0"
-                : "bg-transparent p-0 hover:bg-white/10"
-            }
-            variant="transparent"
+            href={item.href}
+            className={cn(
+              `flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm
+              text-white no-underline transition-colors`,
+              isActive ? "bg-white/20" : "bg-transparent hover:bg-white/10",
+            )}
           >
-            <Link
-              href={item.href}
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2
-                text-sm text-white no-underline"
-            >
-              <Icon className="h-4 w-4" />
-              <span>{item.label}</span>
-            </Link>
-          </Card>
+            <Icon className="h-4 w-4" />
+            <span>{item.label}</span>
+          </Link>
         );
       })}
     </nav>

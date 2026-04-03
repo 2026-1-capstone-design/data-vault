@@ -27,9 +27,5 @@ export default async function ProtectedLayout({
 
   const navItems = getVisibleDashboardNavItems(accessContext.roles);
 
-  return (
-    <DashboardShell navItems={navItems} userEmail={accessContext.user.email}>
-      {children}
-    </DashboardShell>
-  );
+  return <DashboardShell navItems={navItems}>{children}</DashboardShell>;
 }

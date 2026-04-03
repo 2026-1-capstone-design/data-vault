@@ -1,4 +1,14 @@
-import { Card, Link } from "@heroui/react";
+import Link from "next/link";
+
+import { Button } from "~/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
 
 export default function Home() {
   return (
@@ -7,25 +17,40 @@ export default function Home() {
         py-10"
     >
       <Card className="w-full">
-        <Card.Header>
-          <Card.Title>Data Vault Platform Foundation</Card.Title>
-          <Card.Description>
+        <CardHeader>
+          <CardTitle>Data Vault Platform Foundation</CardTitle>
+          <CardDescription>
             Issue #2 기준 인증/권한/DB 기반 골격이 연결된 상태입니다.
-          </Card.Description>
-        </Card.Header>
-        <Card.Content className="space-y-3">
-          <Link href="/dashboard">보호 페이지로 이동</Link>
-          <Link href="/login">로그인 페이지로 이동</Link>
-          <Link href="/api/protected/ping">보호 API 확인</Link>
-        </Card.Content>
-        <Card.Footer className="flex gap-3">
-          <Link className="button button--primary" href="/dashboard">
-            Protected
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-3">
+          <Link
+            className="text-primary underline-offset-4 hover:underline"
+            href="/dashboard"
+          >
+            보호 페이지로 이동
           </Link>
-          <Link className="button button--outline" href="/login">
-            Login
+          <Link
+            className="text-primary underline-offset-4 hover:underline"
+            href="/login"
+          >
+            로그인 페이지로 이동
           </Link>
-        </Card.Footer>
+          <Link
+            className="text-primary underline-offset-4 hover:underline"
+            href="/api/protected/ping"
+          >
+            보호 API 확인
+          </Link>
+        </CardContent>
+        <CardFooter className="flex gap-3">
+          <Button asChild>
+            <Link href="/dashboard">Protected</Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link href="/login">Login</Link>
+          </Button>
+        </CardFooter>
       </Card>
     </main>
   );

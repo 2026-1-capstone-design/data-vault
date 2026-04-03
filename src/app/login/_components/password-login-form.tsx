@@ -1,9 +1,13 @@
 "use client";
 
-import { Alert, Button, Form, Input, Label } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
+import { Alert, AlertDescription } from "~/components/ui/alert";
+import { Button } from "~/components/ui/button";
+import { Field, FieldGroup, FieldLabel } from "~/components/ui/field";
+import { Input } from "~/components/ui/input";
+import { Spinner } from "~/components/ui/spinner";
 import { signInWithPassword } from "~/lib/auth/sign-in-with-password";
 import { createSupabaseBrowserClient } from "~/lib/supabase/client";
 
@@ -40,46 +44,53 @@ export const PasswordLoginForm = () => {
   }
 
   return (
-    <Form onSubmit={onSubmit} className="space-y-3">
-      <Label htmlFor="login-email" isRequired>
-        이메일
-      </Label>
-      <Input
-        id="login-email"
-        name="email"
-        type="email"
-        placeholder="you@team-epoch.dev"
-        value={email}
-        onChange={(event) => setEmail(event.target.value)}
-        required
-        fullWidth
-      />
-      <Label htmlFor="login-password" isRequired>
-        비밀번호
-      </Label>
-      <Input
-        id="login-password"
-        name="password"
-        type="password"
-        placeholder="비밀번호 입력"
-        value={password}
-        onChange={(event) => setPassword(event.target.value)}
-        required
-        fullWidth
-      />
-      <Button type="submit" variant="primary" fullWidth isPending={isPending}>
-        ID/PW 로그인
+    <form onSubmit={onSubmit} className="flex flex-col gap-3">
+      <FieldGroup>
+        <Field>
+          <FieldLabel htmlFor="login-email">이메일</FieldLabel>
+          <Input
+            id="login-email"
+            name="email"
+            type="email"
+            placeholder="you@team-epoch.dev"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            required
+          />
+        </Field>
+        <Field>
+          <FieldLabel htmlFor="login-password">비밀번호</FieldLabel>
+          <Input
+            id="login-password"
+            name="password"
+            type="password"
+            placeholder="비밀번호 입력"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            required
+          />
+        </Field>
+      </FieldGroup>
+      <Button type="submit" className="w-full" disabled={isPending}>
+        {isPending ? (
+          <>
+            <Spinner data-icon="inline-start" />
+            로그인 중...
+          </>
+        ) : (
+          "ID/PW 로그인"
+        )}
       </Button>
       {message ? (
-        <Alert status="success">
-          <p className="text-sm">{message}</p>
+        <Alert>
+          <AlertDescription>{message}</AlertDescription>
         </Alert>
       ) : null}
       {errorMessage ? (
-        <Alert status="danger">
-          <p className="text-sm">{errorMessage}</p>
+        <Alert variant="destructive">
+          <AlertDescription>{errorMessage}</AlertDescription>
         </Alert>
       ) : null}
-    </Form>
+    </form>
   );
 };

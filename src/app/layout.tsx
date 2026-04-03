@@ -1,4 +1,8 @@
 import type { Metadata } from "next";
+
+import { TooltipProvider } from "~/components/ui/tooltip";
+import { cn } from "~/lib/utils";
+
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -12,7 +16,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full antialiased">
+    <html lang="en" className={cn("h-full antialiased", "font-sans")}>
       <head>
         <link
           rel="stylesheet"
@@ -21,7 +25,9 @@ export default function RootLayout({
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
         />
       </head>
-      <body className="flex min-h-full flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">
+        <TooltipProvider>{children}</TooltipProvider>
+      </body>
     </html>
   );
 }
