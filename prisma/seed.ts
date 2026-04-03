@@ -27,6 +27,7 @@ async function main() {
   const defaultAdminUserId = process.env.DEFAULT_ADMIN_USER_ID;
 
   if (!defaultAdminUserId) {
+    // eslint-disable-next-line no-console
     console.warn(
       "DEFAULT_ADMIN_USER_ID is missing. Role seeds were created without admin mapping.",
     );
@@ -61,6 +62,7 @@ async function main() {
 
 main()
   .catch((error) => {
+    // eslint-disable-next-line no-console
     console.error("Seed failed", error);
     process.exit(1);
   })
