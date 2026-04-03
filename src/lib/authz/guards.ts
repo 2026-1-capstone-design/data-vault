@@ -14,7 +14,7 @@ export type AuthContext = {
   roles: RoleName[];
 };
 
-export type LoadRoles = (_userId: string) => Promise<RoleName[]>;
+export type LoadRoles = (userId: string) => Promise<RoleName[]>;
 
 export class AuthzError extends Error {
   code: "UNAUTHENTICATED" | "FORBIDDEN";
