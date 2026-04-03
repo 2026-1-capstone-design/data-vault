@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
 
+import { createServerAccessService } from "~/lib/authz/access-service";
 import { AuthzError } from "~/lib/authz/guards";
 import { rolesForPolicy } from "~/lib/authz/policy";
-import { createServerAccessService } from "~/lib/authz/server-access-service";
 
 export default async function ProtectedLayout({
   children,

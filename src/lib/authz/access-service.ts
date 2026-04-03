@@ -1,3 +1,5 @@
+import { createSupabaseServerClient } from "~/lib/supabase/server";
+
 import {
   requireRole,
   type AuthContext,
@@ -5,6 +7,7 @@ import {
   type RoleName,
   type SessionUser,
 } from "./guards";
+import { createUserAccessRepository } from "./user-access-repository";
 
 type AccessOk = {
   ok: true;
@@ -53,4 +56,25 @@ export function createAccessService(
       return requireRole(user, allowed, deps.loadRoles);
     },
   };
+}
+
+export async function createServerAccessService(): Promise<AccessService> {
+  const supabase = await createSupabaseServerClient();
+  const userAccessRepo = createUserAccessRepository();
+
+  return createAccessService({
+    getCurrentUser: async () => {
+      const { data } = await supabase.auth.getUser();
+
+      if (!data.user) {
+        return null;
+      }
+
+      return {
+        id: data.user.id,
+        email: data.user.email,
+      };
+    },
+    loadRoles: (userId) => userAccessRepo.findRolesByUserId(userId),
+  });
 }

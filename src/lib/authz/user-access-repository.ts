@@ -1,3 +1,5 @@
+import { prisma } from "~/lib/prisma";
+
 import type { RoleName } from "./guards";
 
 type UserRoleQueryClient = {
@@ -20,7 +22,7 @@ export type UserAccessRepository = {
 };
 
 export function createUserAccessRepository(
-  db: UserRoleQueryClient,
+  db: UserRoleQueryClient = prisma,
 ): UserAccessRepository {
   return {
     async findRolesByUserId(userId) {
