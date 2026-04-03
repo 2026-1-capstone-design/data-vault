@@ -1,10 +1,13 @@
 import type { AccessService } from "./access-service";
 import { AuthzError } from "./guards";
+import { rolesForPolicy } from "./policy";
 
 export async function createProtectedPingResponse(
   accessService: AccessService,
 ): Promise<Response> {
-  const result = await accessService.getAccess(["admin", "editor"]);
+  const result = await accessService.getAccess(
+    rolesForPolicy("platformAccess"),
+  );
 
   if (result.ok) {
     return Response.json({

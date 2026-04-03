@@ -1,4 +1,6 @@
-export type RoleName = "admin" | "editor";
+import { hasPolicyAccess, type RoleName } from "./policy";
+
+export type { RoleName };
 
 export type SessionUser = {
   id: string;
@@ -35,7 +37,7 @@ export function requireAuth(user: SessionUser | null | undefined): SessionUser {
 
 export async function requireRole(
   user: SessionUser | null | undefined,
-  allowed: RoleName[],
+  allowed: readonly RoleName[],
   loadRoles: LoadRoles,
 ): Promise<AuthContext> {
   const authenticatedUser = requireAuth(user);
@@ -53,5 +55,5 @@ export async function requireRole(
 }
 
 export function canApprove(roles: RoleName[]): boolean {
-  return roles.some((role) => role === "admin" || role === "editor");
+  return hasPolicyAccess("approvalAccess", roles);
 }
