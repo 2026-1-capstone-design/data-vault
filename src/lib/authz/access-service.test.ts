@@ -59,7 +59,7 @@ describe("createAccessService", () => {
     });
 
     await expect(service.requireAccess(["admin"])).rejects.toThrowError(
-      "FORBIDDEN",
+      "The current role cannot access this.",
     );
   });
 });

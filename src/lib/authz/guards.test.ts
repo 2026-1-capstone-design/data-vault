@@ -11,7 +11,7 @@ import {
 describe("requireAuth", () => {
   it("throws UNAUTHENTICATED when no user exists", () => {
     expect(() => requireAuth(null)).toThrowError(AuthzError);
-    expect(() => requireAuth(null)).toThrowError("UNAUTHENTICATED");
+    expect(() => requireAuth(null)).toThrowError("Login is required.");
   });
 
   it("returns user identity when session is present", () => {
@@ -35,7 +35,7 @@ describe("requireRole", () => {
         ["admin"],
         loadRoles,
       ),
-    ).rejects.toThrowError("FORBIDDEN");
+    ).rejects.toThrowError("The current role cannot access this.");
   });
 
   it("returns context for allowed role", async () => {

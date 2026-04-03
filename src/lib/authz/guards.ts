@@ -1,4 +1,6 @@
-import { hasPolicyAccess, type RoleName } from "./policy";
+import type { RoleName } from "~/generated/prisma/client";
+
+import { hasPolicyAccess } from "./policy";
 
 export type { RoleName };
 
@@ -19,11 +21,10 @@ export class AuthzError extends Error {
   status: number;
 
   constructor(code: "UNAUTHENTICATED" | "FORBIDDEN", message: string) {
-    super(code);
+    super(message);
     this.code = code;
     this.status = code === "UNAUTHENTICATED" ? 401 : 403;
     this.name = "AuthzError";
-    this.cause = message;
   }
 }
 

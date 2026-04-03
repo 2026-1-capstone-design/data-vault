@@ -7,7 +7,7 @@ import { useMemo, useState } from "react";
 import { signInWithPassword } from "~/lib/auth/sign-in-with-password";
 import { createSupabaseBrowserClient } from "~/lib/supabase/client";
 
-export const MagicLinkForm = () => {
+export const PasswordLoginForm = () => {
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const router = useRouter();
   const [email, setEmail] = useState("");

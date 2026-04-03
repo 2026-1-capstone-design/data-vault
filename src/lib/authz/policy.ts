@@ -1,6 +1,11 @@
-export const ROLE_NAMES = ["admin", "editor"] as const;
+import type { RoleName } from "~/generated/prisma/client";
 
-export type RoleName = (typeof ROLE_NAMES)[number];
+export type { RoleName };
+
+export const ROLE_NAMES = [
+  "admin",
+  "editor",
+] as const satisfies readonly RoleName[];
 
 export const ACCESS_POLICIES = {
   platformAccess: ["admin", "editor"],

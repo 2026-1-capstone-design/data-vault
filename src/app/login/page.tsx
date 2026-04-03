@@ -1,6 +1,6 @@
 import { Card, Link } from "@heroui/react";
 
-import { MagicLinkForm } from "./_components/magic-link-form";
+import { PasswordLoginForm } from "./_components/password-login-form";
 
 export default function LoginPage() {
   return (
@@ -19,7 +19,7 @@ export default function LoginPage() {
           <p className="text-foreground/80 text-sm">
             이 화면은 인증 미보유 접근 시 리다이렉트 도착점입니다.
           </p>
-          <MagicLinkForm />
+          <PasswordLoginForm />
           <Link href="/">홈으로 돌아가기</Link>
         </Card.Content>
       </Card>
