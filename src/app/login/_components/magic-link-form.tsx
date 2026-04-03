@@ -4,6 +4,7 @@ import { Alert, Button, Form, Input, Label } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
+import { signInWithPassword } from "~/lib/auth/sign-in-with-password";
 import { createSupabaseBrowserClient } from "~/lib/supabase/client";
 
 export const MagicLinkForm = () => {
@@ -22,13 +23,13 @@ export const MagicLinkForm = () => {
     setMessage(null);
     setErrorMessage(null);
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const result = await signInWithPassword(supabase, {
       email,
       password,
     });
 
-    if (error) {
-      setErrorMessage(error.message);
+    if (!result.ok) {
+      setErrorMessage(result.message);
       setIsPending(false);
       return;
     }
