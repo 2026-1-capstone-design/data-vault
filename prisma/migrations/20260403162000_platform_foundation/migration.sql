@@ -145,56 +145,5 @@ ALTER TABLE "public"."gladiator_name_ideas"
 ADD CONSTRAINT "gladiator_name_ideas_created_by_id_fkey"
 FOREIGN KEY ("created_by_id") REFERENCES "public"."user_profiles"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
--- RLS skeleton on core tables
-ALTER TABLE "public"."weapon_ideas" ENABLE ROW LEVEL SECURITY;
-ALTER TABLE "public"."skill_ideas" ENABLE ROW LEVEL SECURITY;
-ALTER TABLE "public"."perk_ideas" ENABLE ROW LEVEL SECURITY;
-ALTER TABLE "public"."gladiator_name_ideas" ENABLE ROW LEVEL SECURITY;
-
--- Owner-only policy
-CREATE POLICY "weapon_ideas_owner_access" ON "public"."weapon_ideas"
-FOR ALL
-TO authenticated
-USING ((select auth.uid()) = created_by_id)
-WITH CHECK ((select auth.uid()) = created_by_id);
-
-CREATE POLICY "skill_ideas_owner_access" ON "public"."skill_ideas"
-FOR ALL
-TO authenticated
-USING ((select auth.uid()) = created_by_id)
-WITH CHECK ((select auth.uid()) = created_by_id);
-
-CREATE POLICY "perk_ideas_owner_access" ON "public"."perk_ideas"
-FOR ALL
-TO authenticated
-USING ((select auth.uid()) = created_by_id)
-WITH CHECK ((select auth.uid()) = created_by_id);
-
-CREATE POLICY "gladiator_name_ideas_owner_access" ON "public"."gladiator_name_ideas"
-FOR ALL
-TO authenticated
-USING ((select auth.uid()) = created_by_id)
-WITH CHECK ((select auth.uid()) = created_by_id);
-
--- Team role baseline policy (admin/editor)
-CREATE POLICY "weapon_ideas_team_role_access" ON "public"."weapon_ideas"
-FOR ALL
-TO authenticated
-USING (
-  EXISTS (
-    SELECT 1
-    FROM "public"."user_roles" ur
-    JOIN "public"."roles" r ON r.id = ur.role_id
-    WHERE ur.user_id = (select auth.uid())
-      AND r.name IN ('admin', 'editor')
-  )
-)
-WITH CHECK (
-  EXISTS (
-    SELECT 1
-    FROM "public"."user_roles" ur
-    JOIN "public"."roles" r ON r.id = ur.role_id
-    WHERE ur.user_id = (select auth.uid())
-      AND r.name IN ('admin', 'editor')
-  )
-);
+-- Note: RLS/auth-schema policies intentionally omitted.
+-- Access control is enforced at the application layer.

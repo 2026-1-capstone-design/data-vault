@@ -75,14 +75,11 @@ Prisma 설정:
 적용 내용:
 
 - 코어 테이블 생성 + FK/조회 인덱스
-- `weapon_ideas`, `skill_ideas`, `perk_ideas`, `gladiator_name_ideas`에 RLS 활성화
-- owner 접근 정책
-- `admin/editor` 팀 역할 정책(weapon 기준 baseline)
+- 앱 레이어 권한 제어를 전제로 DB 레벨의 Supabase Auth/RLS 정책은 포함하지 않음
 
 성능 가이드:
 
-- 정책식에서 `auth.uid()`는 `(select auth.uid())` 형태 사용
-- policy 조건 컬럼(`created_by_id`, `user_id`, `role_id`) 인덱스 동반 여부 확인
+- 권한 필터에 자주 쓰는 컬럼(`created_by_id`, `user_id`, `role_id`) 인덱스 동반 여부 확인
 
 ## 7. 테스트
 

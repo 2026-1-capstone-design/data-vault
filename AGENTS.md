@@ -17,6 +17,9 @@ This web app does not need responsive design and is intended for desktop use onl
 - `src/shared`: Reusable code outside business logic.
 - `src/providers`: Providers for specific libraries (for example, TanStack).
 
+# Planning Reference Rule
+When creating an implementation plan, always review the PRD and proposal documents under `docs/` first.
+
 # Docs Update Rule
 When updating `README.md` or files under `docs/` after resolving an issue, do not mention issue numbers unless explicitly instructed to reference a specific issue.
 
