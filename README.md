@@ -62,7 +62,14 @@
 
 ## 현재 구현 상태
 
-현재 저장소는 **초기 스캐폴드 단계**이며, 도메인 기능은 PRD 기준으로 설계 중/구현 예정입니다.
+현재 기준으로 다음 기반이 구현되었습니다.
+
+- Supabase Auth 기반 보호 경로 게이트 (`/dashboard`)
+- Prisma 7 기반 스키마/마이그레이션/시드
+- 역할 모델(`admin`, `editor`) 및 사용자-역할 매핑
+- 공통 권한 가드(`requireAuth`, `requireRole`, `canApprove`)
+- 보호 API 샘플 (`/api/protected/ping`)
+- 코어 엔티티 RLS skeleton 마이그레이션
 
 ## 로컬 실행
 
@@ -80,12 +87,17 @@ pnpm dev
 pnpm build
 pnpm start
 pnpm lint
+pnpm test
+pnpm prisma:generate
+pnpm prisma:migrate --name init
+pnpm prisma:seed
 ```
 
 ## 문서
 
 - [프로젝트 제안서](./docs/project-proposal.md)
 - [Data Vault 웹앱 PRD](./docs/prd-data-vault-webapp.md)
+- [Auth/Access Foundation 가이드](./docs/auth-and-access-foundation.md)
 
 ---
 

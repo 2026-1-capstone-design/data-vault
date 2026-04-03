@@ -1,4 +1,7 @@
 {
   "editor.formatOnSave": false,
-  "eslint.codeActionsOnSave.mode": "all"
+  "eslint.codeActionsOnSave.mode": "all",
+  "cSpell.words": [
+    "Supabase"
+  ]
 }
