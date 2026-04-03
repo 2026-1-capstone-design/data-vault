@@ -1,29 +1,17 @@
 import { redirect } from "next/navigation";
 
-import { AuthzError, requireAuth } from "~/lib/authz/guards";
-import { createSupabaseServerClient } from "~/lib/supabase/server";
+import { AuthzError } from "~/lib/authz/guards";
+import { createServerAccessService } from "~/lib/authz/server-access-service";
 
 export default async function ProtectedLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const supabase = await createSupabaseServerClient();
-  const { data, error } = await supabase.auth.getUser();
-
-  if (error) {
-    redirect("/login");
-  }
+  const accessService = await createServerAccessService();
 
   try {
-    requireAuth(
-      data.user
-        ? {
-            id: data.user.id,
-            email: data.user.email,
-          }
-        : null,
-    );
+    await accessService.requireAccess(["admin", "editor"]);
   } catch (error) {
-    if (error instanceof AuthzError && error.code === "UNAUTHENTICATED") {
+    if (error instanceof AuthzError) {
       redirect("/login");
     }
 

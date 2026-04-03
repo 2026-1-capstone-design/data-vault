@@ -1,23 +1,8 @@
 import { createProtectedPingResponse } from "~/lib/authz/protected-ping";
-import { loadUserRoles } from "~/lib/authz/role-store";
-import { createSupabaseServerClient } from "~/lib/supabase/server";
+import { createServerAccessService } from "~/lib/authz/server-access-service";
 
 export async function GET() {
-  const supabase = await createSupabaseServerClient();
+  const accessService = await createServerAccessService();
 
-  return createProtectedPingResponse({
-    getCurrentUser: async () => {
-      const { data } = await supabase.auth.getUser();
-
-      if (!data.user) {
-        return null;
-      }
-
-      return {
-        id: data.user.id,
-        email: data.user.email,
-      };
-    },
-    loadRoles: loadUserRoles,
-  });
+  return createProtectedPingResponse(accessService);
 }

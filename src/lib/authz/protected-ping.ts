@@ -1,40 +1,30 @@
-import {
-  AuthzError,
-  requireRole,
-  type LoadRoles,
-  type SessionUser,
-} from "./guards";
-
-type ProtectedPingDeps = {
-  getCurrentUser: () => Promise<SessionUser | null>;
-  loadRoles: LoadRoles;
-};
+import type { AccessService } from "./access-service";
+import { AuthzError } from "./guards";
 
 export async function createProtectedPingResponse(
-  deps: ProtectedPingDeps,
+  accessService: AccessService,
 ): Promise<Response> {
-  try {
-    const user = await deps.getCurrentUser();
-    const ctx = await requireRole(user, ["admin", "editor"], deps.loadRoles);
+  const result = await accessService.getAccess(["admin", "editor"]);
 
+  if (result.ok) {
     return Response.json({
       ok: true,
-      userId: ctx.user.id,
-      roles: ctx.roles,
+      userId: result.value.user.id,
+      roles: result.value.roles,
     });
-  } catch (error) {
-    if (error instanceof AuthzError) {
-      return Response.json(
-        {
-          ok: false,
-          error: error.code,
-        },
-        {
-          status: error.status,
-        },
-      );
-    }
-
-    throw error;
   }
+
+  if (result.error instanceof AuthzError) {
+    return Response.json(
+      {
+        ok: false,
+        error: result.error.code,
+      },
+      {
+        status: result.error.status,
+      },
+    );
+  }
+
+  throw result.error;
 }
