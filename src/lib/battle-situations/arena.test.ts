@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { clampUnitPositionToArena } from "./arena";
-import type { Arena } from "./model";
+import type { Arena } from "./types";
 
 describe("clampUnitPositionToArena", () => {
   it("clamps position to circle boundary considering unit radius", () => {

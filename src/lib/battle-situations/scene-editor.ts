@@ -1,5 +1,5 @@
 import { clampUnitPositionToArena } from "./arena";
-import type { SceneJson, Unit } from "./model";
+import type { Scene, Unit } from "./types";
 
 type EditableUnitFields = Pick<
   Unit,
@@ -25,9 +25,9 @@ const DEFAULT_UNIT_VALUES: EditableUnitFields = {
 };
 
 export function addUnit(
-  scene: SceneJson,
+  scene: Scene,
   teamId: string,
-): { scene: SceneJson; unitId: string } {
+): { scene: Scene; unitId: string } {
   const team = scene.teams.find((item) => item.id === teamId);
 
   if (!team) {
@@ -56,7 +56,7 @@ export function addUnit(
   };
 }
 
-export function deleteUnit(scene: SceneJson, unitId: string): SceneJson {
+export function deleteUnit(scene: Scene, unitId: string): Scene {
   return {
     ...scene,
     units: scene.units.filter((unit) => unit.unitId !== unitId),
@@ -64,10 +64,10 @@ export function deleteUnit(scene: SceneJson, unitId: string): SceneJson {
 }
 
 export function updateUnit(
-  scene: SceneJson,
+  scene: Scene,
   unitId: string,
   patch: Partial<EditableUnitFields>,
-): SceneJson {
+): Scene {
   return {
     ...scene,
     units: scene.units.map((unit) =>
@@ -82,13 +82,13 @@ export function updateUnit(
 }
 
 export function moveUnit(
-  scene: SceneJson,
+  scene: Scene,
   unitId: string,
   position: {
     x: number;
     y: number;
   },
-): SceneJson {
+): Scene {
   return {
     ...scene,
     units: scene.units.map((unit) => {
@@ -117,7 +117,7 @@ export function moveUnit(
 }
 
 function quantizePositionToIntegerInArena(
-  arena: SceneJson["arena"],
+  arena: Scene["arena"],
   input: {
     x: number;
     y: number;
@@ -176,7 +176,7 @@ function quantizePositionToIntegerInArena(
   });
 }
 
-function getNextTeamUnitNumber(scene: SceneJson, namePrefix: string): number {
+function getNextTeamUnitNumber(scene: Scene, namePrefix: string): number {
   const max = scene.units
     .filter((unit) => unit.name.startsWith(`${namePrefix}_`))
     .map((unit) => Number.parseInt(unit.name.slice(namePrefix.length + 1), 10))

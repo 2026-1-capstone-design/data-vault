@@ -1,7 +1,7 @@
-import type { SceneJson } from "~/lib/battle-situation-builder/model";
+import type { Scene } from "~/lib/battle-situations/types";
 
 export type BattleSituationCanvasProps = {
-  scene: SceneJson;
+  scene: Scene;
   width?: number;
   height?: number;
   draggable?: boolean;

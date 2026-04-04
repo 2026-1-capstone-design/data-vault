@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import type { DashboardNavItem } from "~/lib/navigation/dashboard-nav";
 import { DASHBOARD_NAV_ICON_MAP } from "~/lib/navigation/dashboard-nav-icons";
 import { isDashboardNavActive } from "~/lib/navigation/is-nav-active";
-import { cn } from "~/lib/utils";
+import { cn } from "~/shared/utils";
 
 type DashboardSidebarProps = {
   items: readonly DashboardNavItem[];

@@ -1,4 +1,4 @@
-import { createSupabaseServerClient } from "~/lib/supabase/server";
+import { supabaseServerClient } from "~/shared/supabase/server";
 
 import {
   requireRole,
@@ -59,12 +59,11 @@ export function createAccessService(
 }
 
 export async function createServerAccessService(): Promise<AccessService> {
-  const supabase = await createSupabaseServerClient();
   const userAccessRepo = createUserAccessRepository();
 
   return createAccessService({
     getCurrentUser: async () => {
-      const { data } = await supabase.auth.getUser();
+      const { data } = await supabaseServerClient.auth.getUser();
 
       if (!data.user) {
         return null;

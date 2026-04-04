@@ -1,8 +1,8 @@
 import { BattleSituationCanvas } from "~/components/BattleSituationCanvas";
 import { Label } from "~/components/ui/label";
 import { Slider } from "~/components/ui/slider";
-import type { SceneJson } from "~/lib/battle-situation-builder/model";
-import { cn } from "~/lib/utils";
+import type { Scene } from "~/lib/battle-situations/types";
+import { cn } from "~/shared/utils";
 
 import {
   ARENA_RADIUS_MAX,
@@ -11,7 +11,7 @@ import {
 } from "./battle-editor.shared";
 
 type BattleEditorCanvasPanelProps = {
-  scene: SceneJson;
+  scene: Scene;
   isDirty: boolean;
   selectedUnitId?: string;
   onUnitPress: (unitId: string) => void;

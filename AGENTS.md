@@ -10,6 +10,12 @@ Use shadcn components from `src/components/ui` as the default for all basic UI c
 # Responsive Scope Rule
 This web app does not need responsive design and is intended for desktop use only.
 
+# Data Fetching Rule
+Use tRPC and TanStack Query for all data communication between the server and the client.
+
+# Query Construction Rule
+When creating any TanStack Query query or mutation, always use `react-query-kit`.
+
 # Folder Structure Rule
 - `src/app`: Next.js App Router. Place one-off components in the appropriate scoped `_components` folder under this directory. If a component here starts being reused, move it to `src/components`.
 - `src/components`: Reusable components. Keep a single depth (do not split by domain; express domain context in the component name).

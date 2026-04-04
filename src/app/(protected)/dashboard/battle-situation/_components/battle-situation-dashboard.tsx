@@ -1,14 +1,21 @@
 "use client";
 
-import { ArrowDown, ArrowUp, ArrowUpDown, PencilLine } from "lucide-react";
+import {
+  type ColumnDef,
+  type PaginationState,
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import { PencilLine } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { ApiErrorDialog } from "~/components/ApiErrorDialog";
 import { BattleSituationCanvas } from "~/components/BattleSituationCanvas";
-import { DbInteractionOverlay } from "~/components/DbInteractionOverlay";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Spinner } from "~/components/ui/spinner";
 import {
   Table,
   TableBody,
@@ -17,15 +24,16 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import type { SceneJson } from "~/lib/battle-situation-builder/model";
-import type { BattleSituationListSort } from "~/lib/battle-situations/service";
-import { requestJson } from "~/shared/network/request-json";
+import { useBattleSituationList } from "~/lib/battle-situations/queries";
+import type { Scene } from "~/lib/battle-situations/types";
+
+const PAGE_SIZE = 10;
 
 type BattleSituationItem = {
   id: string;
   title: string | null;
   description: string;
-  sceneJson: SceneJson;
+  sceneJson: Scene;
   semanticJson: Record<string, unknown>;
   allyCount: number;
   enemyCount: number;
@@ -36,135 +44,159 @@ type BattleSituationItem = {
   updatedAt: string;
 };
 
-type BattleSituationListMeta = {
-  page: number;
-  pageSize: number;
-  total: number;
-  totalPages: number;
-  sortBy: BattleSituationListSort;
-  sortOrder: "asc" | "desc";
+type BattleSituationListPage = {
+  items: BattleSituationItem[];
+  meta: {
+    totalCount: number;
+  };
 };
 
-type BattleSituationListQuery = Pick<
-  BattleSituationListMeta,
-  "page" | "pageSize" | "sortBy" | "sortOrder"
->;
-
-const DEFAULT_META: BattleSituationListMeta = {
-  page: 1,
-  pageSize: 10,
-  total: 0,
-  totalPages: 1,
-  sortBy: "updatedAt",
-  sortOrder: "desc",
+const EMPTY_BATTLE_SITUATION_ROWS: BattleSituationItem[] = [];
+type BattleSituationColumnMeta = {
+  headerClassName?: string;
+  cellClassName?: string;
 };
 
-const SORTABLE_COLUMNS: readonly BattleSituationListSort[] = [
-  "allyCount",
-  "enemyCount",
-  "totalCount",
+const BATTLE_SITUATION_COLUMNS: ColumnDef<BattleSituationItem>[] = [
+  {
+    id: "title",
+    header: "이름",
+    accessorFn: (row) => row.title,
+    cell: ({ row }) => {
+      return row.original.title?.trim() ? row.original.title : "제목 없음";
+    },
+    meta: {
+      headerClassName: "w-[100px]",
+      cellClassName: "font-medium",
+    } satisfies BattleSituationColumnMeta,
+  },
+  {
+    id: "description",
+    header: "설명",
+    accessorFn: (row) => row.description,
+    meta: {
+      cellClassName: "max-w-[420px] truncate",
+    } satisfies BattleSituationColumnMeta,
+  },
+  {
+    id: "allyCount",
+    header: "아군 수",
+    accessorFn: (row) => row.allyCount,
+    meta: {
+      headerClassName: "w-[100px]",
+    } satisfies BattleSituationColumnMeta,
+  },
+  {
+    id: "enemyCount",
+    header: "적군 수",
+    accessorFn: (row) => row.enemyCount,
+    meta: {
+      headerClassName: "w-[100px]",
+    } satisfies BattleSituationColumnMeta,
+  },
+  {
+    id: "totalCount",
+    header: "총 인원",
+    accessorFn: (row) => row.totalCount,
+    meta: {
+      headerClassName: "w-[100px]",
+    } satisfies BattleSituationColumnMeta,
+  },
 ];
 
 export const BattleSituationDashboard = () => {
   const router = useRouter();
-  const [rows, setRows] = useState<BattleSituationItem[]>([]);
-  const [meta, setMeta] = useState<BattleSituationListMeta>(DEFAULT_META);
-  const [isPending, setIsPending] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: PAGE_SIZE,
+  });
+  const [dismissedError, setDismissedError] = useState<unknown>(null);
   const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
 
-  const loadList = useCallback(async (query: BattleSituationListQuery) => {
-    setIsPending(true);
-    try {
-      const params = new URLSearchParams({
-        page: String(query.page),
-        pageSize: String(query.pageSize),
-        sort: query.sortBy,
-        order: query.sortOrder,
-      });
+  const {
+    data,
+    error,
+    hasNextPage,
+    fetchNextPage,
+    isLoading,
+    isFetchingNextPage,
+  } = useBattleSituationList({ variables: { limit: PAGE_SIZE } });
 
-      const response = await requestJson<
-        BattleSituationItem[],
-        BattleSituationListMeta
-      >(`/api/battle-situations?${params.toString()}`);
-
-      setRows(response.data);
-      setMeta((current) => ({
-        ...current,
-        ...(response.meta ?? {}),
-      }));
-
-      setSelectedId((current) => {
-        if (current && response.data.some((item) => item.id === current)) {
-          return current;
-        }
-        return response.data[0]?.id;
-      });
-    } catch (error) {
-      setErrorMessage(toUserMessage(error));
-    } finally {
-      setIsPending(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void loadList({
-      page: meta.page,
-      pageSize: meta.pageSize,
-      sortBy: meta.sortBy,
-      sortOrder: meta.sortOrder,
-    });
-  }, [loadList, meta.page, meta.pageSize, meta.sortBy, meta.sortOrder]);
+  const pages = (data?.pages ?? []) as unknown as BattleSituationListPage[];
+  const total = pages[0]?.meta.totalCount ?? 0;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const maxPageIndex = Math.max(totalPages - 1, 0);
+  const currentPageIndex = Math.min(pagination.pageIndex, maxPageIndex);
+  const currentPage = pages[currentPageIndex];
+  const currentPageNumber = currentPageIndex + 1;
+  const rows = currentPage?.items ?? EMPTY_BATTLE_SITUATION_ROWS;
+  const isPending = isLoading || isFetchingNextPage;
+  const errorMessage =
+    error && error !== dismissedError ? toUserMessage(error) : null;
+  const resolvedSelectedId =
+    selectedId && rows.some((item) => item.id === selectedId)
+      ? selectedId
+      : rows[0]?.id;
 
   const selected = useMemo(
-    () => rows.find((row) => row.id === selectedId),
-    [rows, selectedId],
+    () => rows.find((row) => row.id === resolvedSelectedId),
+    [resolvedSelectedId, rows],
   );
 
-  const handleSort = (column: BattleSituationListSort) => {
-    if (!SORTABLE_COLUMNS.includes(column)) {
+  useEffect(() => {
+    if (pagination.pageIndex <= maxPageIndex) {
       return;
     }
 
-    setMeta((current) => {
-      if (current.sortBy === column) {
-        return {
-          ...current,
-          page: 1,
-          sortOrder: current.sortOrder === "asc" ? "desc" : "asc",
-        };
-      }
+    setPagination((current) => ({
+      ...current,
+      pageIndex: maxPageIndex,
+    }));
+  }, [maxPageIndex, pagination.pageIndex]);
 
-      return {
-        ...current,
-        page: 1,
-        sortBy: column,
-        sortOrder: "desc",
-      };
-    });
-  };
+  // eslint-disable-next-line react-hooks/incompatible-library -- TanStack Table returns non-memoizable helpers.
+  const table = useReactTable({
+    data: rows,
+    columns: BATTLE_SITUATION_COLUMNS,
+    getCoreRowModel: getCoreRowModel(),
+    manualPagination: true,
+    pageCount: totalPages,
+    state: {
+      pagination: {
+        ...pagination,
+        pageIndex: currentPageIndex,
+      },
+    },
+    onPaginationChange: setPagination,
+  });
 
   const handlePrev = () => {
-    if (meta.page <= 1) {
+    if (!table.getCanPreviousPage()) {
       return;
     }
-    setMeta((current) => ({ ...current, page: current.page - 1 }));
+
+    table.previousPage();
   };
 
-  const handleNext = () => {
-    if (meta.page >= meta.totalPages) {
+  const handleNext = async () => {
+    if (!table.getCanNextPage()) {
       return;
     }
-    setMeta((current) => ({ ...current, page: current.page + 1 }));
+
+    const nextPageIndex = currentPageIndex + 1;
+    if (!pages[nextPageIndex] && hasNextPage) {
+      await fetchNextPage();
+    }
+
+    table.nextPage();
   };
 
   return (
     <>
-      <DbInteractionOverlay open={isPending} />
       <ApiErrorDialog
         open={Boolean(errorMessage)}
         message={errorMessage ?? ""}
-        onClose={() => setErrorMessage(null)}
+        onClose={() => setDismissedError(error ?? null)}
       />
 
       <div
@@ -175,90 +207,120 @@ export const BattleSituationDashboard = () => {
           <CardHeader className="pb-2">
             <CardTitle>전장 상황</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="flex flex-col gap-3">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[100px]">이름</TableHead>
-                  <TableHead>설명</TableHead>
-                  <TableHead className="w-[100px]">
-                    <SortButton
-                      label="아군 수"
-                      active={meta.sortBy === "allyCount"}
-                      order={meta.sortOrder}
-                      onClick={() => handleSort("allyCount")}
-                    />
-                  </TableHead>
-                  <TableHead className="w-[100px]">
-                    <SortButton
-                      label="적군 수"
-                      active={meta.sortBy === "enemyCount"}
-                      order={meta.sortOrder}
-                      onClick={() => handleSort("enemyCount")}
-                    />
-                  </TableHead>
-                  <TableHead className="w-[100px]">
-                    <SortButton
-                      label="총 인원"
-                      active={meta.sortBy === "totalCount"}
-                      order={meta.sortOrder}
-                      onClick={() => handleSort("totalCount")}
-                    />
-                  </TableHead>
-                </TableRow>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => {
+                      const meta = header.column.columnDef.meta as
+                        | BattleSituationColumnMeta
+                        | undefined;
+
+                      return (
+                        <TableHead
+                          key={header.id}
+                          className={meta?.headerClassName}
+                        >
+                          {header.isPlaceholder
+                            ? null
+                            : flexRender(
+                                header.column.columnDef.header,
+                                header.getContext(),
+                              )}
+                        </TableHead>
+                      );
+                    })}
+                  </TableRow>
+                ))}
               </TableHeader>
               <TableBody>
-                {rows.length === 0 ? (
+                {isPending && rows.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={table.getAllColumns().length}>
+                      <div
+                        className="text-muted-foreground flex items-center
+                          justify-center gap-2 py-8 text-sm"
+                      >
+                        <Spinner />
+                        <span>전장 상황을 불러오는 중입니다.</span>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : table.getRowModel().rows.length === 0 ? (
                   <TableRow>
                     <TableCell
-                      colSpan={5}
+                      colSpan={table.getAllColumns().length}
                       className="text-muted-foreground py-8"
                     >
                       저장된 전장 상황이 없습니다.
                     </TableCell>
                   </TableRow>
                 ) : (
-                  rows.map((row) => {
-                    const isSelected = row.id === selectedId;
+                  table.getRowModel().rows.map((row) => {
+                    const isSelected = row.original.id === resolvedSelectedId;
                     return (
                       <TableRow
                         key={row.id}
                         data-state={isSelected ? "selected" : undefined}
                         className="cursor-pointer"
-                        onClick={() => setSelectedId(row.id)}
+                        onClick={() => setSelectedId(row.original.id)}
                       >
-                        <TableCell className="font-medium">
-                          {row.title?.trim() ? row.title : "제목 없음"}
-                        </TableCell>
-                        <TableCell className="max-w-[420px] truncate">
-                          {row.description}
-                        </TableCell>
-                        <TableCell>{row.allyCount}</TableCell>
-                        <TableCell>{row.enemyCount}</TableCell>
-                        <TableCell>{row.totalCount}</TableCell>
+                        {row.getVisibleCells().map((cell) => {
+                          const meta = cell.column.columnDef.meta as
+                            | BattleSituationColumnMeta
+                            | undefined;
+
+                          return (
+                            <TableCell
+                              key={cell.id}
+                              className={meta?.cellClassName}
+                            >
+                              {flexRender(
+                                cell.column.columnDef.cell,
+                                cell.getContext(),
+                              )}
+                            </TableCell>
+                          );
+                        })}
                       </TableRow>
                     );
                   })
                 )}
+                {isFetchingNextPage && rows.length > 0 ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={table.getAllColumns().length}
+                      className="text-muted-foreground py-2 text-center text-xs"
+                    >
+                      <span className="inline-flex items-center gap-2">
+                        <Spinner className="size-3.5" />
+                        다음 페이지를 불러오는 중입니다.
+                      </span>
+                    </TableCell>
+                  </TableRow>
+                ) : null}
               </TableBody>
             </Table>
 
             <div className="flex items-center justify-between pt-1">
               <p className="text-muted-foreground text-sm">
-                총 {meta.total}개 / {meta.page} / {meta.totalPages} 페이지
+                총 {total}개 / {currentPageNumber} / {totalPages} 페이지
               </p>
               <div className="flex gap-2">
                 <Button
                   variant="outline"
                   onClick={handlePrev}
-                  disabled={meta.page <= 1}
+                  disabled={!table.getCanPreviousPage()}
                 >
                   이전
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={handleNext}
-                  disabled={meta.page >= meta.totalPages}
+                  onClick={() => {
+                    void handleNext();
+                  }}
+                  disabled={!table.getCanNextPage() || isFetchingNextPage}
                 >
                   다음
                 </Button>
@@ -292,7 +354,7 @@ export const BattleSituationDashboard = () => {
                 좌측 테이블의 row를 선택하면 상세가 표시됩니다.
               </p>
             ) : (
-              <div className="space-y-3">
+              <div className="flex flex-col gap-3">
                 <div>
                   <p className="text-sm font-semibold">
                     {selected.title?.trim() ? selected.title : "제목 없음"}
@@ -315,7 +377,7 @@ export const BattleSituationDashboard = () => {
                     draggable={false}
                   />
                 </div>
-                <div className="space-y-1">
+                <div className="flex flex-col gap-1">
                   <p className="text-xs font-semibold">Scene JSON</p>
                   <pre
                     className="bg-muted max-h-[260px] overflow-auto rounded-md
@@ -330,24 +392,6 @@ export const BattleSituationDashboard = () => {
         </Card>
       </div>
     </>
-  );
-};
-
-type SortButtonProps = {
-  label: string;
-  active: boolean;
-  order: "asc" | "desc";
-  onClick: () => void;
-};
-
-const SortButton = ({ label, active, order, onClick }: SortButtonProps) => {
-  const Icon = !active ? ArrowUpDown : order === "asc" ? ArrowUp : ArrowDown;
-
-  return (
-    <Button variant="ghost" size="sm" className="h-8 px-1" onClick={onClick}>
-      <span>{label}</span>
-      <Icon />
-    </Button>
   );
 };
 

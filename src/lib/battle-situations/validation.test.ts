@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import type { SceneJson } from "./model";
+import type { Scene } from "./types";
 import { validateScene } from "./validation";
 
-function createScene(centerX: number, centerY: number): SceneJson {
+function createScene(centerX: number, centerY: number): Scene {
   return {
     arena: {
       shape: "circle",

@@ -1,4 +1,4 @@
-import type { Arena } from "./model";
+import type { Arena } from "./types";
 
 type ClampInput = {
   x: number;

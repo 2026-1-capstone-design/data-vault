@@ -1,8 +1,4 @@
-import type {
-  SceneJson,
-  Team,
-  Unit,
-} from "~/lib/battle-situation-builder/model";
+import type { Scene, Team, Unit } from "~/lib/battle-situations/types";
 
 export type EditableNumericField =
   | "hp"
@@ -29,7 +25,7 @@ export const ARENA_RADIUS_MIN = 120;
 export const ARENA_RADIUS_MAX = 600;
 export const ARENA_RADIUS_STEP = 10;
 
-const createDefaultScene = (): SceneJson => {
+const createDefaultScene = (): Scene => {
   return {
     arena: {
       shape: "circle",
@@ -79,17 +75,6 @@ const createDefaultScene = (): SceneJson => {
 };
 
 export const DEFAULT_SCENE = createDefaultScene();
-
-export const cloneScene = (scene: SceneJson): SceneJson => {
-  return {
-    arena: {
-      ...scene.arena,
-      center: { ...scene.arena.center },
-    },
-    teams: scene.teams.map((team) => ({ ...team })),
-    units: scene.units.map((unit) => ({ ...unit })),
-  };
-};
 
 export const createUnitSortOrder = (teams: Team[]) => {
   const order = new Map<string, number>();

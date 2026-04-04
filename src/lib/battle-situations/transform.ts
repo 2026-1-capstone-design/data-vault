@@ -1,4 +1,4 @@
-import type { SceneJson, SemanticJson, Unit } from "./model";
+import type { Scene, Semantic, Unit } from "./types";
 
 function toSemanticUnit(unit: Unit) {
   return {
@@ -17,7 +17,7 @@ function toSemanticUnit(unit: Unit) {
   };
 }
 
-export function toSemantic(scene: SceneJson): SemanticJson {
+export function toSemantic(scene: Scene): Semantic {
   const allies = scene.units
     .filter((unit) => unit.teamId === "ally")
     .map(toSemanticUnit);

@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import type { SceneJson } from "./model";
 import { addUnit, deleteUnit, moveUnit, updateUnit } from "./scene-editor";
+import type { Scene } from "./types";
 
-const baseScene: SceneJson = {
+const baseScene: Scene = {
   arena: {
     shape: "circle",
     center: { x: 0, y: 0 },

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
@@ -9,10 +9,9 @@ import { Field, FieldGroup, FieldLabel } from "~/components/ui/field";
 import { Input } from "~/components/ui/input";
 import { Spinner } from "~/components/ui/spinner";
 import { signInWithPassword } from "~/lib/auth/sign-in-with-password";
-import { createSupabaseBrowserClient } from "~/lib/supabase/client";
+import { supabaseBrowserClient } from "~/shared/supabase/client";
 
 export const PasswordLoginForm = () => {
-  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,7 +26,7 @@ export const PasswordLoginForm = () => {
     setMessage(null);
     setErrorMessage(null);
 
-    const result = await signInWithPassword(supabase, {
+    const result = await signInWithPassword(supabaseBrowserClient, {
       email,
       password,
     });

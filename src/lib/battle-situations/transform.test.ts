@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import type { SceneJson } from "./model";
 import { toSemantic } from "./transform";
+import type { Scene } from "./types";
 
 describe("toSemantic", () => {
   it("maps units into allies and enemies by teamId", () => {
-    const scene: SceneJson = {
+    const scene: Scene = {
       arena: {
         shape: "circle",
         center: { x: 0, y: 0 },

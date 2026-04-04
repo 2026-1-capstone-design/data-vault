@@ -1,20 +1,24 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { ApiErrorDialog } from "~/components/ApiErrorDialog";
 import { DbInteractionOverlay } from "~/components/DbInteractionOverlay";
-import { clampUnitPositionToArena } from "~/lib/battle-situation-builder/arena";
-import type { SceneJson } from "~/lib/battle-situation-builder/model";
+import { clampUnitPositionToArena } from "~/lib/battle-situations/arena";
+import {
+  useCreateBattleSimulation,
+  useUpdateBattleSimulation,
+} from "~/lib/battle-situations/mutations";
+import { useBattleSituation } from "~/lib/battle-situations/queries";
 import {
   addUnit,
   moveUnit,
   updateUnit,
-} from "~/lib/battle-situation-builder/scene-editor";
-import { toSemantic } from "~/lib/battle-situation-builder/transform";
-import { validateScene } from "~/lib/battle-situation-builder/validation";
-import { requestJson } from "~/shared/network/request-json";
+} from "~/lib/battle-situations/scene-editor";
+import { toSemantic } from "~/lib/battle-situations/transform";
+import type { Scene } from "~/lib/battle-situations/types";
+import { validateScene } from "~/lib/battle-situations/validation";
 
 import { BattleEditorCanvasPanel } from "./battle-editor-canvas-panel";
 import { BattleEditorControlsCard } from "./battle-editor-controls-card";
@@ -26,7 +30,6 @@ import {
   ARENA_RADIUS_STEP,
   buildNumericPatch,
   clampNumber,
-  cloneScene,
   createUnitSortOrder,
   DEFAULT_SCENE,
   formatSavedLabel,
@@ -36,21 +39,6 @@ import {
   toValidNumericValue,
 } from "./battle-editor.shared";
 
-type BattleSituationApiItem = {
-  id: string;
-  title: string | null;
-  description: string;
-  sceneJson: SceneJson;
-  semanticJson: Record<string, unknown>;
-  allyCount: number;
-  enemyCount: number;
-  totalCount: number;
-  createdById: string;
-  updatedById: string;
-  createdAt: string;
-  updatedAt: string;
-};
-
 const DEFAULT_TITLE = "";
 const DEFAULT_DESCRIPTION = "";
 
@@ -59,8 +47,15 @@ export const BattleEditor = () => {
   const searchParams = useSearchParams();
   const battleSituationId = searchParams.get("battleSituationId");
 
-  const [scene, setScene] = useState<SceneJson>(() =>
-    cloneScene(DEFAULT_SCENE),
+  const createMutation = useCreateBattleSimulation();
+  const updateMutation = useUpdateBattleSimulation();
+  const battleSituationQuery = useBattleSituation({
+    variables: { id: battleSituationId ?? "" },
+    enabled: Boolean(battleSituationId),
+  });
+
+  const [scene, setScene] = useState<Scene>(() =>
+    structuredClone(DEFAULT_SCENE),
   );
   const [title, setTitle] = useState(DEFAULT_TITLE);
   const [description, setDescription] = useState(DEFAULT_DESCRIPTION);
@@ -72,8 +67,8 @@ export const BattleEditor = () => {
   const [savedSnapshot, setSavedSnapshot] = useState(() =>
     serializeEditorState(DEFAULT_SCENE, DEFAULT_TITLE, DEFAULT_DESCRIPTION),
   );
-  const [isDbPending, setIsDbPending] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [dismissedQueryError, setDismissedQueryError] = useState<unknown>(null);
 
   const serializedScene = useMemo(
     () => serializeEditorState(scene, title, description),
@@ -81,11 +76,39 @@ export const BattleEditor = () => {
   );
   const isDirty = serializedScene !== savedSnapshot;
 
+  if (!battleSituationId) {
+    if (loadedId !== null) {
+      const nextScene = structuredClone(DEFAULT_SCENE);
+      const nextSnapshot = serializeEditorState(
+        nextScene,
+        DEFAULT_TITLE,
+        DEFAULT_DESCRIPTION,
+      );
+      setScene(nextScene);
+      setTitle(DEFAULT_TITLE);
+      setDescription(DEFAULT_DESCRIPTION);
+      setSelectedUnitId(nextScene.units[0]?.unitId);
+      setLoadedId(null);
+      setSavedSnapshot(nextSnapshot);
+      setStatusText("신규 등록 모드로 전환했습니다.");
+    }
+  }
+
   const teamMap = useMemo(() => {
     return new Map(scene.teams.map((team) => [team.id, team]));
   }, [scene.teams]);
 
   const modeText = battleSituationId ? "수정 모드" : "신규 등록 모드";
+  const isDbPending =
+    battleSituationQuery.isFetching ||
+    createMutation.isPending ||
+    updateMutation.isPending;
+  const queryErrorMessage =
+    battleSituationQuery.error != null &&
+    battleSituationQuery.error !== dismissedQueryError
+      ? toUserMessage(battleSituationQuery.error)
+      : null;
+  const activeErrorMessage = errorMessage ?? queryErrorMessage;
 
   const sortedUnits = useMemo(() => {
     const teamOrder = createUnitSortOrder(scene.teams);
@@ -125,20 +148,20 @@ export const BattleEditor = () => {
     });
   }, [scene.teams, scene.units, selectedUnitId]);
 
-  useEffect(() => {
+  const syncScene = useCallback(() => {
     if (!battleSituationId) {
       if (loadedId !== null) {
-        const nextScene = cloneScene(DEFAULT_SCENE);
-        setScene(nextScene);
-        setTitle(DEFAULT_TITLE);
-        setDescription(DEFAULT_DESCRIPTION);
-        setSelectedUnitId(nextScene.units[0]?.unitId);
-        setLoadedId(null);
+        const nextScene = structuredClone(DEFAULT_SCENE);
         const nextSnapshot = serializeEditorState(
           nextScene,
           DEFAULT_TITLE,
           DEFAULT_DESCRIPTION,
         );
+        setScene(nextScene);
+        setTitle(DEFAULT_TITLE);
+        setDescription(DEFAULT_DESCRIPTION);
+        setSelectedUnitId(nextScene.units[0]?.unitId);
+        setLoadedId(null);
         setSavedSnapshot(nextSnapshot);
         setStatusText("신규 등록 모드로 전환했습니다.");
       }
@@ -149,53 +172,33 @@ export const BattleEditor = () => {
       return;
     }
 
-    let cancelled = false;
+    const response = battleSituationQuery.data;
+    if (!response || response.id == null) {
+      return;
+    }
 
-    const load = async () => {
-      setIsDbPending(true);
-      try {
-        const response = await requestJson<BattleSituationApiItem>(
-          `/api/battle-situations/${battleSituationId}`,
-        );
+    const nextScene = response.sceneJson;
+    const nextTitle = response.title ?? DEFAULT_TITLE;
+    const nextDescription = response.description ?? DEFAULT_DESCRIPTION;
+    const nextSnapshot = serializeEditorState(
+      nextScene,
+      nextTitle,
+      nextDescription,
+    );
 
-        if (cancelled) {
-          return;
-        }
+    setScene(nextScene);
+    setTitle(nextTitle);
+    setDescription(nextDescription);
+    setSelectedUnitId(nextScene.units[0]?.unitId);
+    setLoadedId(response.id);
+    setSavedSnapshot(nextSnapshot);
+    setStatusText("전장 상황을 불러왔습니다.");
+  }, [battleSituationId, battleSituationQuery.data, loadedId]);
 
-        const nextScene = ensureScene(response.data.sceneJson);
-        const nextTitle = response.data.title ?? DEFAULT_TITLE;
-        const nextDescription =
-          response.data.description ?? DEFAULT_DESCRIPTION;
-
-        setScene(nextScene);
-        setTitle(nextTitle);
-        setDescription(nextDescription);
-        setSelectedUnitId(nextScene.units[0]?.unitId);
-        setLoadedId(response.data.id);
-        setSavedSnapshot(
-          serializeEditorState(nextScene, nextTitle, nextDescription),
-        );
-        setStatusText("전장 상황을 불러왔습니다.");
-      } catch (error) {
-        if (!cancelled) {
-          setErrorMessage(toUserMessage(error));
-        }
-      } finally {
-        if (!cancelled) {
-          setIsDbPending(false);
-        }
-      }
-    };
-
-    void load();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [battleSituationId, loadedId]);
+  syncScene();
 
   const handleReset = () => {
-    const nextScene = cloneScene(DEFAULT_SCENE);
+    const nextScene = structuredClone(DEFAULT_SCENE);
     setScene(nextScene);
     setTitle(DEFAULT_TITLE);
     setDescription(DEFAULT_DESCRIPTION);
@@ -210,22 +213,16 @@ export const BattleEditor = () => {
       return;
     }
 
-    await runDbAction(async () => {
+    try {
       const payload = buildSavePayload(scene, title, description);
-      const endpoint = battleSituationId
-        ? `/api/battle-situations/${battleSituationId}`
-        : "/api/battle-situations";
-      const method = battleSituationId ? "PATCH" : "POST";
+      const response = battleSituationId
+        ? await updateMutation.mutateAsync({
+            id: battleSituationId,
+            ...payload,
+          })
+        : await createMutation.mutateAsync(payload);
 
-      const response = await requestJson<BattleSituationApiItem>(endpoint, {
-        method,
-        headers: {
-          "content-type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
-
-      const savedId = response.data.id;
+      const savedId = response.id;
       setLoadedId(savedId);
       setSavedSnapshot(serializedScene);
 
@@ -236,7 +233,9 @@ export const BattleEditor = () => {
       }
 
       setStatusText(`저장 완료 (${formatSavedLabel(new Date())})`);
-    });
+    } catch (error) {
+      setErrorMessage(toUserMessage(error));
+    }
   };
 
   const handleSaveAs = async () => {
@@ -248,27 +247,20 @@ export const BattleEditor = () => {
       return;
     }
 
-    await runDbAction(async () => {
+    try {
       const payload = buildSavePayload(scene, title, description);
-      const response = await requestJson<BattleSituationApiItem>(
-        "/api/battle-situations",
-        {
-          method: "POST",
-          headers: {
-            "content-type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        },
-      );
+      const response = await createMutation.mutateAsync(payload);
 
-      const savedId = response.data.id;
+      const savedId = response.id;
       setLoadedId(savedId);
       setSavedSnapshot(serializedScene);
       router.replace(
         `/dashboard/battle-situation-builder?battleSituationId=${savedId}`,
       );
       setStatusText(`새 전장으로 저장 완료 (${formatSavedLabel(new Date())})`);
-    });
+    } catch (error) {
+      setErrorMessage(toUserMessage(error));
+    }
   };
 
   const handleAddUnit = (teamId: string) => {
@@ -398,24 +390,16 @@ export const BattleEditor = () => {
     });
   };
 
-  const runDbAction = async (work: () => Promise<void>) => {
-    setIsDbPending(true);
-    try {
-      await work();
-    } catch (error) {
-      setErrorMessage(toUserMessage(error));
-    } finally {
-      setIsDbPending(false);
-    }
-  };
-
   return (
     <>
       <DbInteractionOverlay open={isDbPending} />
       <ApiErrorDialog
-        open={Boolean(errorMessage)}
-        message={errorMessage ?? ""}
-        onClose={() => setErrorMessage(null)}
+        open={Boolean(activeErrorMessage)}
+        message={activeErrorMessage ?? ""}
+        onClose={() => {
+          setErrorMessage(null);
+          setDismissedQueryError(battleSituationQuery.error);
+        }}
       />
 
       <div className="animate-in fade-in-0 flex w-full duration-500">
@@ -465,35 +449,25 @@ export const BattleEditor = () => {
   );
 };
 
-function ensureScene(value: unknown): SceneJson {
-  if (
-    typeof value === "object" &&
-    value !== null &&
-    "arena" in value &&
-    "teams" in value &&
-    "units" in value
-  ) {
-    return cloneScene(value as SceneJson);
-  }
+function buildSavePayload(scene: Scene, title: string, description: string) {
+  const allyCount = scene.units.filter((unit) => unit.teamId === "ally").length;
+  const enemyCount = scene.units.filter(
+    (unit) => unit.teamId === "enemy",
+  ).length;
 
-  return cloneScene(DEFAULT_SCENE);
-}
-
-function buildSavePayload(
-  scene: SceneJson,
-  title: string,
-  description: string,
-) {
   return {
     title: title.trim().length > 0 ? title.trim() : null,
     description: description.trim(),
     sceneJson: scene,
     semanticJson: toSemantic(scene),
+    allyCount,
+    enemyCount,
+    totalCount: allyCount + enemyCount,
   };
 }
 
 function serializeEditorState(
-  scene: SceneJson,
+  scene: Scene,
   title: string,
   description: string,
 ): string {

@@ -1,4 +1,4 @@
-import type { SceneJson } from "./model";
+import type { Scene } from "./types";
 
 export type ValidationResult =
   | { ok: true }
@@ -7,7 +7,7 @@ export type ValidationResult =
       errors: string[];
     };
 
-export function validateScene(scene: SceneJson): ValidationResult {
+export function validateScene(scene: Scene): ValidationResult {
   const errors: string[] = [];
 
   if (scene.arena.center.x !== 0 || scene.arena.center.y !== 0) {

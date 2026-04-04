@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Circle, Group, Layer, Stage, Text } from "react-konva";
 
-import { clampUnitPositionToArena } from "~/lib/battle-situation-builder/arena";
+import { clampUnitPositionToArena } from "~/lib/battle-situations/arena";
 
 import type { BattleSituationCanvasProps } from "./BattleSituationCanvas.types";
 

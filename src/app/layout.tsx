@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 
 import { TooltipProvider } from "~/components/ui/tooltip";
-import { cn } from "~/lib/utils";
+import { QueryProvider } from "~/shared/tanstack-query/client";
+import { cn } from "~/shared/utils";
 
 import "./globals.css";
 
@@ -26,7 +27,9 @@ export default function RootLayout({
         />
       </head>
       <body className="flex min-h-full flex-col">
-        <TooltipProvider>{children}</TooltipProvider>
+        <QueryProvider>
+          <TooltipProvider>{children}</TooltipProvider>
+        </QueryProvider>
       </body>
     </html>
   );
