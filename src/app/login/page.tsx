@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 import {
   Card,
   CardContent,
@@ -18,22 +16,11 @@ export default function LoginPage() {
     >
       <Card className="w-full">
         <CardHeader>
-          <CardTitle>Login Required</CardTitle>
-          <CardDescription>
-            Supabase Auth를 통해 로그인 후 보호 경로로 접근하세요.
-          </CardDescription>
+          <CardTitle>로그인</CardTitle>
+          <CardDescription>로그인이 필요합니다.</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
-          <p className="text-muted-foreground text-sm">
-            이 화면은 인증 미보유 접근 시 리다이렉트 도착점입니다.
-          </p>
           <PasswordLoginForm />
-          <Link
-            className="text-primary underline-offset-4 hover:underline"
-            href="/"
-          >
-            홈으로 돌아가기
-          </Link>
         </CardContent>
       </Card>
     </main>

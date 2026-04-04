@@ -37,8 +37,8 @@ export const PasswordLoginForm = () => {
       return;
     }
 
-    setMessage("로그인 성공. 대시보드로 이동합니다.");
-    router.replace("/dashboard");
+    setMessage("로그인 성공. 홈으로 이동합니다.");
+    router.replace("/");
     setIsPending(false);
   }
 

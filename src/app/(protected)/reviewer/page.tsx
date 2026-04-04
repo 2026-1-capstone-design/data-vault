@@ -10,7 +10,7 @@ export default async function ReviewerPage() {
     await accessService.requireAccess(["admin"]);
   } catch (error) {
     if (error instanceof AuthzError) {
-      redirect("/dashboard");
+      redirect("/");
     }
 
     throw error;

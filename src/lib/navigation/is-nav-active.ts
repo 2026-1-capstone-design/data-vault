@@ -7,7 +7,7 @@ export function isDashboardNavActive({
   currentPathname,
   itemHref,
 }: IsDashboardNavActiveInput): boolean {
-  if (itemHref === "/dashboard") {
+  if (itemHref === "/") {
     return currentPathname === itemHref;
   }
 

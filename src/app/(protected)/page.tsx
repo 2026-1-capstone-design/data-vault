@@ -1,6 +1,9 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 export default function ProtectedHomePage() {
+  redirect("/battle-situation-builder");
+
   return (
     <div className="space-y-4">
       <h1 className="text-2xl font-semibold">Dashboard Home</h1>

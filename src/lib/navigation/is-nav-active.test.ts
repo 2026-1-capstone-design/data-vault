@@ -6,15 +6,31 @@ describe("isDashboardNavActive", () => {
   it("keeps parent menu active for child routes", () => {
     expect(
       isDashboardNavActive({
-        currentPathname: "/dashboard/ideas/weapons/123",
-        itemHref: "/dashboard/ideas/weapons",
+        currentPathname: "/ideas/weapons/123",
+        itemHref: "/ideas/weapons",
       }),
     ).toBe(true);
 
     expect(
       isDashboardNavActive({
-        currentPathname: "/dashboard/reviewer",
-        itemHref: "/dashboard/ideas/weapons",
+        currentPathname: "/reviewer",
+        itemHref: "/ideas/weapons",
+      }),
+    ).toBe(false);
+  });
+
+  it("marks only exact root path as home active", () => {
+    expect(
+      isDashboardNavActive({
+        currentPathname: "/",
+        itemHref: "/",
+      }),
+    ).toBe(true);
+
+    expect(
+      isDashboardNavActive({
+        currentPathname: "/battle-situation",
+        itemHref: "/",
       }),
     ).toBe(false);
   });

@@ -8,13 +8,13 @@ describe("DASHBOARD_NAV_ITEMS", () => {
       (entry) => entry.key === "battle-situation",
     );
 
-    expect(item?.href).toBe("/dashboard/battle-situation");
+    expect(item?.href).toBe("/battle-situation");
   });
 
   it("enables only battle situation entries", () => {
-    const enabledKeys = DASHBOARD_NAV_ITEMS.filter((item) => !item.disabled).map(
-      (item) => item.key,
-    );
+    const enabledKeys = DASHBOARD_NAV_ITEMS.filter(
+      (item) => !item.disabled,
+    ).map((item) => item.key);
 
     expect(enabledKeys).toEqual([
       "battle-situation",

@@ -228,7 +228,7 @@ export const BattleEditor = () => {
 
       if (battleSituationId !== savedId) {
         router.replace(
-          `/dashboard/battle-situation-builder?battleSituationId=${savedId}`,
+          `/battle-situation-builder?battleSituationId=${savedId}`,
         );
       }
 
@@ -254,9 +254,7 @@ export const BattleEditor = () => {
       const savedId = response.id;
       setLoadedId(savedId);
       setSavedSnapshot(serializedScene);
-      router.replace(
-        `/dashboard/battle-situation-builder?battleSituationId=${savedId}`,
-      );
+      router.replace(`/battle-situation-builder?battleSituationId=${savedId}`);
       setStatusText(`새 전장으로 저장 완료 (${formatSavedLabel(new Date())})`);
     } catch (error) {
       setErrorMessage(toUserMessage(error));

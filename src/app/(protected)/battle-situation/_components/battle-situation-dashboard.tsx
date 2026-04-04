@@ -339,7 +339,7 @@ export const BattleSituationDashboard = () => {
                 size="sm"
                 onClick={() =>
                   router.push(
-                    `/dashboard/battle-situation-builder?battleSituationId=${selected.id}`,
+                    `/battle-situation-builder?battleSituationId=${selected.id}`,
                   )
                 }
               >
