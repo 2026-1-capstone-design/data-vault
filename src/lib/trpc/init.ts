@@ -41,3 +41,5 @@ export const baseProcedure = t.procedure.use(async ({ ctx, next }) => {
     },
   });
 });
+
+// TODO 권한 별로 procedure 분리하기

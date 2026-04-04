@@ -10,4 +10,15 @@ describe("DASHBOARD_NAV_ITEMS", () => {
 
     expect(item?.href).toBe("/dashboard/battle-situation");
   });
+
+  it("enables only battle situation entries", () => {
+    const enabledKeys = DASHBOARD_NAV_ITEMS.filter((item) => !item.disabled).map(
+      (item) => item.key,
+    );
+
+    expect(enabledKeys).toEqual([
+      "battle-situation",
+      "battle-situation-builder",
+    ]);
+  });
 });

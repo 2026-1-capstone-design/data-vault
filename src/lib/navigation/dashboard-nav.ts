@@ -26,6 +26,7 @@ export type DashboardNavItem = {
   href: string;
   iconKey: DashboardNavIconKey;
   roles: readonly RoleName[];
+  disabled: boolean;
 };
 
 export const DASHBOARD_NAV_ITEMS: readonly DashboardNavItem[] = [
@@ -35,6 +36,7 @@ export const DASHBOARD_NAV_ITEMS: readonly DashboardNavItem[] = [
     href: "/dashboard",
     iconKey: "house",
     roles: ["admin", "editor"],
+    disabled: true,
   },
   {
     key: "ideas-weapons",
@@ -42,6 +44,7 @@ export const DASHBOARD_NAV_ITEMS: readonly DashboardNavItem[] = [
     href: "/dashboard/ideas/weapons",
     iconKey: "swords",
     roles: ["admin", "editor"],
+    disabled: true,
   },
   {
     key: "ideas-skills",
@@ -49,6 +52,7 @@ export const DASHBOARD_NAV_ITEMS: readonly DashboardNavItem[] = [
     href: "/dashboard/ideas/skills",
     iconKey: "flame",
     roles: ["admin", "editor"],
+    disabled: true,
   },
   {
     key: "ideas-perks",
@@ -56,6 +60,7 @@ export const DASHBOARD_NAV_ITEMS: readonly DashboardNavItem[] = [
     href: "/dashboard/ideas/perks",
     iconKey: "shield",
     roles: ["admin", "editor"],
+    disabled: true,
   },
   {
     key: "ideas-gladiator-names",
@@ -63,6 +68,7 @@ export const DASHBOARD_NAV_ITEMS: readonly DashboardNavItem[] = [
     href: "/dashboard/ideas/gladiator-names",
     iconKey: "scroll-text",
     roles: ["admin", "editor"],
+    disabled: true,
   },
   {
     key: "battle-situation",
@@ -70,6 +76,7 @@ export const DASHBOARD_NAV_ITEMS: readonly DashboardNavItem[] = [
     href: "/dashboard/battle-situation",
     iconKey: "hammer",
     roles: ["admin", "editor"],
+    disabled: false,
   },
   {
     key: "battle-situation-builder",
@@ -77,6 +84,7 @@ export const DASHBOARD_NAV_ITEMS: readonly DashboardNavItem[] = [
     href: "/dashboard/battle-situation-builder",
     iconKey: "hammer",
     roles: ["admin", "editor"],
+    disabled: false,
   },
   {
     key: "persona",
@@ -84,6 +92,7 @@ export const DASHBOARD_NAV_ITEMS: readonly DashboardNavItem[] = [
     href: "/dashboard/persona",
     iconKey: "user-round",
     roles: ["admin", "editor"],
+    disabled: true,
   },
   {
     key: "dataset",
@@ -91,6 +100,7 @@ export const DASHBOARD_NAV_ITEMS: readonly DashboardNavItem[] = [
     href: "/dashboard/dataset",
     iconKey: "book-open",
     roles: ["admin", "editor"],
+    disabled: true,
   },
   {
     key: "reviewer",
@@ -98,5 +108,6 @@ export const DASHBOARD_NAV_ITEMS: readonly DashboardNavItem[] = [
     href: "/dashboard/reviewer",
     iconKey: "shield",
     roles: ["admin"],
+    disabled: true,
   },
 ];

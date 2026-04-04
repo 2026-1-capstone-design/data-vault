@@ -22,10 +22,27 @@ export const DashboardSidebar = ({ items }: DashboardSidebarProps) => {
     >
       {items.map((item) => {
         const Icon = DASHBOARD_NAV_ICON_MAP[item.iconKey];
+        const isDisabled = item.disabled;
         const isActive = isDashboardNavActive({
           currentPathname: pathname,
           itemHref: item.href,
         });
+
+        if (isDisabled) {
+          return (
+            <div
+              key={item.key}
+              aria-disabled="true"
+              className={cn(
+                `flex w-full cursor-not-allowed items-center gap-3 rounded-lg px-3
+                py-2 text-sm text-white/50 no-underline`,
+              )}
+            >
+              <Icon className="h-4 w-4" />
+              <span>{item.label}</span>
+            </div>
+          );
+        }
 
         return (
           <Link
