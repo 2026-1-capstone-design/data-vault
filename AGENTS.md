@@ -34,3 +34,12 @@ When running lint for code verification, use `--fix` so any auto-fixable issues 
 
 # GitHub PR Creation Rule
 When creating a GitHub pull request, always use the `gh` CLI command instead of the GitHub MCP tools.
+
+# API Management Rule
+Use tRPC for API management and TanStack Query for server-client state synchronization.
+
+# React Import Rule
+When using React module APIs (e.g., `useState`, `useEffect`, `useRef`), import them as named imports and do not use the `React.` prefix.
+
+# Context Creation Rule
+Use the `createContext` function from `@/shared/react` instead of React's built-in `createContext`.

@@ -73,7 +73,24 @@ const eslintConfig = defineConfig([
       "no-console": 1,
       "no-unused-vars": "off",
       "@typescript-eslint/no-unused-vars": "error",
-      "no-restricted-imports": [2, {}],
+    },
+  },
+  {
+    ignores: ["src/components/ui/**"],
+    rules: {
+      "no-restricted-imports": [
+        2,
+        {
+          paths: [
+            {
+              name: "react",
+              importNames: ["createContext"],
+              message:
+                "Please use the custom createContext function from '~/shared/react' instead of the default react createContext function.",
+            },
+          ],
+        },
+      ],
     },
   },
   {

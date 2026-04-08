@@ -100,7 +100,7 @@ export const DASHBOARD_NAV_ITEMS: readonly DashboardNavItem[] = [
     href: "/dataset",
     iconKey: "book-open",
     roles: ["admin", "editor"],
-    disabled: true,
+    disabled: false,
   },
   {
     key: "reviewer",
