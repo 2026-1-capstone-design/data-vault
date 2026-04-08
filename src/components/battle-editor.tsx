@@ -18,7 +18,7 @@ import { toSemantic } from "~/lib/battle-situations/transform";
 import type { Scene } from "~/lib/battle-situations/types";
 import { validateScene } from "~/lib/battle-situations/validation";
 
-import { ApiErrorDialog } from "./ApiErrorDialog";
+import { ApiErrorDialog } from "./api-error-dialog";
 import { BattleEditorCanvasPanel } from "./battle-editor-canvas-panel";
 import { BattleEditorControlsCard } from "./battle-editor-controls-card";
 import { BattleEditorUnitCreateCard } from "./battle-editor-unit-create-card";
@@ -37,7 +37,7 @@ import {
   toFiniteNumber,
   toValidNumericValue,
 } from "./battle-editor.shared";
-import { DbInteractionOverlay } from "./DbInteractionOverlay";
+import { DbInteractionOverlay } from "./db-interaction-overlay";
 
 const DEFAULT_TITLE = "";
 const DEFAULT_DESCRIPTION = "";

@@ -11,7 +11,7 @@ import { PencilLine } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
-import { ApiErrorDialog } from "~/components/ApiErrorDialog";
+import { ApiErrorDialog } from "~/components/api-error-dialog";
 import { BattleSituationCanvas } from "~/components/battle-situation-canvas";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
