@@ -105,6 +105,16 @@ const eslintConfig = defineConfig([
       "react/function-component-definition": 0,
     },
   },
+  {
+    files: [
+      "**/*.test.{js,jsx,ts,tsx}",
+      "**/__mocks__/**",
+      "**/mocks.{js,jsx,ts,tsx}",
+    ],
+    rules: {
+      "import/no-extraneous-dependencies": 0,
+    },
+  },
 ]);
 
 export default eslintConfig;

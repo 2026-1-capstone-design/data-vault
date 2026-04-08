@@ -12,9 +12,6 @@ import {
   Target,
 } from "lucide-react";
 
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
-import { Textarea } from "~/components/ui/textarea";
 import type { Team, Unit } from "~/lib/battle-situations/types";
 import { cn } from "~/shared/utils";
 
@@ -23,6 +20,9 @@ import type {
   PositionAxis,
 } from "./battle-editor.shared";
 import { toTeamBadgeStyle } from "./battle-editor.shared";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Textarea } from "./ui/textarea";
 
 type BattleEditorUnitInspectorProps = {
   units: Unit[];

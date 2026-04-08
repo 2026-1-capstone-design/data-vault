@@ -5,7 +5,7 @@ import { Circle, Group, Layer, Stage, Text } from "react-konva";
 
 import { clampUnitPositionToArena } from "~/lib/battle-situations/arena";
 
-import type { BattleSituationCanvasProps } from "./BattleSituationCanvas.types";
+import type { BattleSituationCanvasProps } from "./battle-situation-canvas.types";
 
 const DEFAULT_WIDTH = 900;
 const DEFAULT_HEIGHT = 600;
@@ -116,7 +116,7 @@ export const BattleSituationCanvas = ({
             const stroke =
               selectedUnitId === unit.unitId ? "#111827" : "#ffffff";
             const unitPixelRadius = Math.max(8, unit.unitRadius * scale);
-            const rangeWorldRadius = unit.unitRadius + unit.range * 24;
+            const rangeWorldRadius = unit.unitRadius + unit.range;
             const rangePixelRadius = Math.max(
               unitPixelRadius + 2,
               rangeWorldRadius * scale,

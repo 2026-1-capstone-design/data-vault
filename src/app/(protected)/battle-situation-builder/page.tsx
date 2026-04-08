@@ -1,4 +1,4 @@
-import { BattleEditor } from "./_components/battle-editor";
+import { BattleEditor } from "~/components/battle-editor";
 
 export default async function BattleSituationBuilderPage({
   searchParams,

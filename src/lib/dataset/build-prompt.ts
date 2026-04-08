@@ -80,8 +80,8 @@ const SYSTEM_INSTRUCTION = `당신은 검투사 AI 학습용 데이터셋을 생
     ]
   },
   "user_input": {
-    "area_situation": {     // 전장 상황. src/lib/battle-situations/types.ts 의 Semantic 스키마를 따릅니다.
-      "arena": { "shape": "circle", "center": { "x": number, "y": number }, "radius": number },
+    "area_situation": {     // 전장 상황.
+      "arena": { "shape": "circle", "center": { "x": 0, "y": 0 }, "radius": 200 },
       "allies": [
         {
           "unitId": string,                     // 예: "A_01". 유닛의 이름(name)은 절대 포함하지 말 것.
@@ -93,6 +93,7 @@ const SYSTEM_INSTRUCTION = `당신은 검투사 AI 학습용 데이터셋을 생
       "enemies": [ /* allies 와 동일한 형식. unitId 는 "E_01" 등. name 필드 금지. */ ]
     },
     "command": string       // 지휘관의 명령. 유닛 참조는 반드시 "{A_01}", "{E_02}" 처럼 중괄호로 감싼 unitId 형태로 작성. 절대 실제 이름으로 치환하지 마세요.
+                            // e.g. "{A_01}에게 돌격해라"
   },
   "output": {
     "thinking": string,     // 검투사가 명령을 받고 행동을 결정하기까지의 1인칭 사고 흐름. 페르소나의 말투/성격을 반영.
@@ -108,10 +109,10 @@ const SYSTEM_INSTRUCTION = `당신은 검투사 AI 학습용 데이터셋을 생
 2. \`command\`, \`dialog\` 안에서 다른 유닛을 가리킬 때는 반드시 "{A_01}", "{E_02}" 같이 중괄호로 감싼 unitId 를 그대로 남겨두세요. 이후 문자열 치환에 사용됩니다.
 3. \`output.action\` 의 각 항목 \`type\` 은 반드시 \`system_prompt.tools\` 에 정의된 \`type\` 중 하나여야 합니다.
 4. 페르소나, 사고 흐름(thinking), 대사(dialog) 의 톤은 일관되어야 합니다.
-5. 좌표는 \`arena\` 안에 들어오도록 합리적인 정수를 사용하세요.
+5. \`arena\` 는 항상 \`{ "shape": "circle", "center": { "x": 0, "y": 0 }, "radius": 200 }\` 으로 고정하세요. 유닛 좌표는 이 원 안에 들어오도록 합리적인 정수를 사용하세요.
 6. 사용자가 명령 불복종을 요청한 경우, thinking/dialog/action 에서 명령과 어긋나는 행동을 자연스럽게 표현하세요.
 7. 어떤 유닛의 이름(고유 명칭)도 출력 어디에도 등장시키지 마세요. \`allies\`/\`enemies\` 항목에 \`name\` 필드를 포함하지 말고, \`thinking\`/\`dialog\`/\`command\` 에서도 유닛을 부를 때는 반드시 "{A_01}", "{E_02}" 같은 중괄호 unitId 플레이스홀더만 사용하세요. 이름 기반 호칭(예: "아이언씨", "철수") 을 절대 쓰지 마세요.
-8. \`system_prompt.personality\` 는 "당신은 ~~입니다." 처럼 검투사에게 2인칭으로 정체성과 성격을 지시하는 문장들로만 구성하세요. "저는 ...", "나는 ..." 과 같이 검투사가 스스로를 소개하는 1인칭 문장은 금지입니다.`;
+8. \`system_prompt.personality\` 는 "당신은 ~~입니다." 처럼 검투사에게 2인칭으로 정체성과 성격을 지시하는 문장들로만 구성하세요. "저는 ...", "나는 ..." 과 같이 검투사가 스스로를 소개하는 1인칭 문장은 금지입니다. 또한 유닛의 이름을 포함시키지 마세요.`;
 
 const formatBoolean = (value: boolean) => (value ? "예" : "아니오");
 

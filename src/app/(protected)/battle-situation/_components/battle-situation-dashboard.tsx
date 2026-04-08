@@ -12,7 +12,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 import { ApiErrorDialog } from "~/components/ApiErrorDialog";
-import { BattleSituationCanvas } from "~/components/BattleSituationCanvas";
+import { BattleSituationCanvas } from "~/components/battle-situation-canvas";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Spinner } from "~/components/ui/spinner";

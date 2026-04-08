@@ -1,5 +1,3 @@
-import { supabaseServerClient } from "~/shared/supabase/server";
-
 import {
   requireRole,
   type AuthContext,
@@ -59,6 +57,7 @@ export function createAccessService(
 }
 
 export async function createServerAccessService(): Promise<AccessService> {
+  const { supabaseServerClient } = await import("~/shared/supabase/server");
   const userAccessRepo = createUserAccessRepository();
 
   return createAccessService({

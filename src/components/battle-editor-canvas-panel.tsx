@@ -1,6 +1,3 @@
-import { BattleSituationCanvas } from "~/components/BattleSituationCanvas";
-import { Label } from "~/components/ui/label";
-import { Slider } from "~/components/ui/slider";
 import type { Scene } from "~/lib/battle-situations/types";
 import { cn } from "~/shared/utils";
 
@@ -9,6 +6,9 @@ import {
   ARENA_RADIUS_MIN,
   ARENA_RADIUS_STEP,
 } from "./battle-editor.shared";
+import { BattleSituationCanvas } from "./battle-situation-canvas";
+import { Label } from "./ui/label";
+import { Slider } from "./ui/slider";
 
 type BattleEditorCanvasPanelProps = {
   scene: Scene;

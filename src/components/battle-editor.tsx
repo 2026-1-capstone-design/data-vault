@@ -3,8 +3,6 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 
-import { ApiErrorDialog } from "~/components/ApiErrorDialog";
-import { DbInteractionOverlay } from "~/components/DbInteractionOverlay";
 import { clampUnitPositionToArena } from "~/lib/battle-situations/arena";
 import {
   useCreateBattleSimulation,
@@ -20,6 +18,7 @@ import { toSemantic } from "~/lib/battle-situations/transform";
 import type { Scene } from "~/lib/battle-situations/types";
 import { validateScene } from "~/lib/battle-situations/validation";
 
+import { ApiErrorDialog } from "./ApiErrorDialog";
 import { BattleEditorCanvasPanel } from "./battle-editor-canvas-panel";
 import { BattleEditorControlsCard } from "./battle-editor-controls-card";
 import { BattleEditorUnitCreateCard } from "./battle-editor-unit-create-card";
@@ -38,6 +37,7 @@ import {
   toFiniteNumber,
   toValidNumericValue,
 } from "./battle-editor.shared";
+import { DbInteractionOverlay } from "./DbInteractionOverlay";
 
 const DEFAULT_TITLE = "";
 const DEFAULT_DESCRIPTION = "";

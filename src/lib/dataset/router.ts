@@ -31,6 +31,7 @@ export const datasetRouter = createTRPCRouter({
         const sample = await generateJson<DatasetSample>(prompt);
         return sample;
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.error("Failed to generate dataset sample:", error);
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",

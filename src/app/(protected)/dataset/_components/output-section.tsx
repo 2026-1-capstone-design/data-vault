@@ -6,6 +6,8 @@ import { Empty, EmptyDescription, EmptyTitle } from "~/components/ui/empty";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { Separator } from "~/components/ui/separator";
 
+import { AreaSituationPreview } from "./area-situation-preview";
+
 const Section = ({
   title,
   children,
@@ -76,7 +78,16 @@ export const OutputSection = () => {
               <Separator />
 
               <Section title="User Input · Area Situation">
-                <JsonBlock value={result.user_input.area_situation} />
+                <div className="flex gap-4">
+                  <div className="w-0 flex-1">
+                    <JsonBlock value={result.user_input.area_situation} />
+                  </div>
+                  <div className="w-0 flex-1">
+                    <AreaSituationPreview
+                      areaSituation={result.user_input.area_situation}
+                    />
+                  </div>
+                </div>
               </Section>
 
               <Section title="User Input · Command">
