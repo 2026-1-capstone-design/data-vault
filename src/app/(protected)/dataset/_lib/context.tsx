@@ -8,6 +8,7 @@ import {
   type SetStateAction,
 } from "react";
 
+import type { DatasetSample } from "~/lib/dataset/build-prompt";
 import { createContext } from "~/shared/react";
 
 export type BattleMode = "auto" | "builder";
@@ -38,6 +39,11 @@ interface DatasetContextValue {
 
   dialoguePrompt: string;
   setDialoguePrompt: Dispatch<SetStateAction<string>>;
+
+  result: DatasetSample | null;
+  setResult: Dispatch<SetStateAction<DatasetSample | null>>;
+  errorMessage: string | null;
+  setErrorMessage: Dispatch<SetStateAction<string | null>>;
 }
 
 export const [DatasetContext, useDatasetContext] =
@@ -62,6 +68,9 @@ export const DatasetProvider = ({ children }: PropsWithChildren) => {
 
   const [dialoguePrompt, setDialoguePrompt] = useState("");
 
+  const [result, setResult] = useState<DatasetSample | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
   const value = useMemo(
     () => ({
       personaPrompt,
@@ -84,6 +93,10 @@ export const DatasetProvider = ({ children }: PropsWithChildren) => {
       setGladiatorActionPrompt,
       dialoguePrompt,
       setDialoguePrompt,
+      result,
+      setResult,
+      errorMessage,
+      setErrorMessage,
     }),
     [
       personaPrompt,
@@ -96,6 +109,8 @@ export const DatasetProvider = ({ children }: PropsWithChildren) => {
       willDisobeyCommand,
       gladiatorActionPrompt,
       dialoguePrompt,
+      result,
+      errorMessage,
     ],
   );
 

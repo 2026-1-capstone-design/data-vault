@@ -5,6 +5,8 @@ import { Field, FieldGroup } from "~/components/ui/field";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
 
+import { OptionalTag } from "./optional-tag";
+
 export const CommanderOrderSection = () => {
   const { commanderOrderPrompt, setCommanderOrderPrompt } = useDatasetContext();
 
@@ -12,7 +14,7 @@ export const CommanderOrderSection = () => {
     <FieldGroup>
       <Field>
         <Label htmlFor="commander-order-prompt">
-          지휘관의 명령 생성 프롬프트
+          지휘관의 명령 생성 프롬프트 <OptionalTag />
         </Label>
         <Textarea
           id="commander-order-prompt"

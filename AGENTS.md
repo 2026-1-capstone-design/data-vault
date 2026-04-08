@@ -32,6 +32,9 @@ When updating `README.md` or files under `docs/` after resolving an issue, do no
 # Lint Verification Rule
 When running lint for code verification, use `--fix` so any auto-fixable issues are resolved automatically.
 
+# Code Verification Rule
+After finishing code modifications, always run the verification script `pnpm code-check` to ensure there are no lint, type, or test regressions.
+
 # GitHub PR Creation Rule
 When creating a GitHub pull request, always use the `gh` CLI command instead of the GitHub MCP tools.
 
