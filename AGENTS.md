@@ -23,6 +23,9 @@ When creating any TanStack Query query or mutation, always use `react-query-kit`
 - `src/shared`: Reusable code outside business logic.
 - `src/providers`: Providers for specific libraries (for example, TanStack).
 
+# Naming Convention Rule
+All directory and file names MUST use `kebab-case`.
+
 # Planning Reference Rule
 When creating an implementation plan, always review the PRD and proposal documents under `docs/` first.
 
